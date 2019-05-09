@@ -20,3 +20,52 @@ coverage
 
 # temp test files
 tests/**/temp/
+
+#C Sharp
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+.vs/
+Generated\ Files/
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+*_i.c
+*_p.c
+*_i.h
+*.ilk
+*.meta
+*.obj
+*.iobj
+*.pch
+*.pdb
+*.ipdb
+*.pgc
+*.pgd
+*.rsp
+*.sbr
+*.tlb
+*.tli
+*.tlh
+*.tmp
+*.tmp_proj
+*.log
+*.vspscc
+*.vssscc
+.builds
+*.pidb
+*.svclog
+*.scc
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+*.[Cc]ache
+!*.[Cc]ache/
+/C#/Botkit/Adapters/Properties/AssemblyInfo.cs
+/C#/Botkit/Botkit/Properties/AssemblyInfo.cs
+/C#/Botkit/Botkit/packages.config
