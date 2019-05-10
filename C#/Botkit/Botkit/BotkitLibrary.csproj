@@ -158,18 +158,20 @@
     <Compile Include="BotkitFrameworkAdapter.cs" />
     <Compile Include="CMS\CMSConfiguration.cs" />
     <Compile Include="Conversation\BotkitConversation.cs" />
-    <Compile Include="Conversation\BotkitConvoStep.cs" />
-    <Compile Include="Conversation\BotkitConvoHandler.cs" />
-    <Compile Include="Conversation\BotkitConvoTrigger.cs" />
-    <Compile Include="Conversation\BotkitMessageTemplate.cs" />
+    <Compile Include="Conversation\IBotkitConvoStep.cs" />
+    <Compile Include="Conversation\IBotkitConvoHandler.cs" />
+    <Compile Include="Conversation\IBotkitConvoTrigger.cs" />
+    <Compile Include="Conversation\IBotkitMessageTemplate.cs" />
     <Compile Include="Core\Botkit.cs" />
     <Compile Include="Core\BotkitConfiguration.cs" />
     <Compile Include="BotkitConversationState.cs" />
-    <Compile Include="Core\BotkitHandler.cs" />
-    <Compile Include="Core\BotkitMessage.cs" />
+    <Compile Include="Core\IBotkitHandler.cs" />
+    <Compile Include="Core\IBotkitMessage.cs" />
     <Compile Include="BotWorker.cs" />
-    <Compile Include="Core\BotkitPlugin.cs" />
-    <Compile Include="Core\BotkitTrigger.cs" />
+    <Compile Include="Core\IBotkitPlugin.cs" />
+    <Compile Include="Core\IBotkitTrigger.cs" />
+    <Compile Include="Core\IMiddleware.cs" />
+    <Compile Include="Core\Middleware.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

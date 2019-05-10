@@ -31,7 +31,7 @@ namespace BotkitLibrary.CMS
         /// </summary>
         /// <param name="bot">The current bot worker instance</param>
         /// <param name="message">An incoming message to be interpreted</param>
-        public async void TestTrigger(BotWorker bot, BotkitMessage message)
+        public async void TestTrigger(BotWorker bot, IBotkitMessage message)
         {
 
         }

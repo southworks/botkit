@@ -7,7 +7,7 @@ using Microsoft.Bot.Schema;
 
 namespace BotkitLibrary.Core
 {
-    public class BotkitMessage
+    public interface IBotkitMessage
     {
         public string Type { get; set; }
         public string Text { get; set; }

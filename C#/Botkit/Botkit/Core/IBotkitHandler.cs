@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace BotkitLibrary.Core
 {
-    class BotkitTrigger
+    public interface IBotkitHandler
     {
+        public Func<BotWorker, IBotkitMessage, object> Handler { get; set; }
     }
 }

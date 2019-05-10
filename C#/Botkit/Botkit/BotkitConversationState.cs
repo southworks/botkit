@@ -8,7 +8,13 @@ using Microsoft.Bot.Schema;
 
 namespace BotkitLibrary
 {
-    internal class BotkitConversationState : ConversationState
+    /// <summary>
+    ///  A customized version of ConversationState that override the getStorageKey method to create a more complex key value.
+    ///  This allows Botkit to automatically track conversation state in scenarios where multiple users are present in a single channel,
+    ///  or when threads or sub-channels parent channel that would normally collide based on the information defined in the conversation address field.
+    ///  Note: This is used automatically inside Botkit and developers should not need to directly interact with it.
+    /// </summary>
+    public class BotkitConversationState : ConversationState
     {
         public BotkitConversationState(IStorage storage) : base(storage)
         {
@@ -39,7 +45,7 @@ namespace BotkitLibrary
                 throw new Exception("missing activity.conversation.id");
             }
 
-            return $"{ ChannelId }/ conversations /{ ConversationId }/{ this.namespace }";
+            return $"{ ChannelId }/ conversations /{ ConversationId }/{ typeof(BotkitConversationState).Namespace }";
         }
     }
 }
