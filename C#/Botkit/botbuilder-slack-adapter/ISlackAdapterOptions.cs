@@ -1,12 +1,12 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Adapters
+namespace botbuilder_slack_adapter
 {
-    public class Adapter
+    interface ISlackAdapterOptions
     {
     }
 }
