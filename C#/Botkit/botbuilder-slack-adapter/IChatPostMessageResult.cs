@@ -1,5 +1,3 @@
-using SlackAPI;
-
 namespace BotkitLibrary
 {
     /// <summary>
@@ -10,5 +8,5 @@ namespace BotkitLibrary
         string channel { get; }
         string ts { get; }
         string message { get; }
-}
+    }
 }
