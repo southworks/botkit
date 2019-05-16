@@ -1,14 +1,18 @@
+// Copyright(c) Microsoft Corporation.All rights reserved.
+// Licensed under the MIT License.
+
+using SlackAPI;
+
 namespace BotkitLibrary
 {
     /// <summary>
     /// Interface to cast result of web api calls
     /// </summary>
-    public interface IAuthTestResult
+    public abstract class AuthTestResult : Response
     {
         string user { get; }
         string team { get; }
         string userId { get; }
         string teamId { get; }
-        bool ok { get; }
     }
 }
