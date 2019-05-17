@@ -1,7 +1,7 @@
-/**
- * Copyright(c) Microsoft Corporation.All rights reserved.
- * Licensed under the MIT License.
- */
+//
+// Copyright(c) Microsoft Corporation.All rights reserved.
+// Licensed under the MIT License.
+// 
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Schema;
 using System;
@@ -11,30 +11,17 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-/**
- * A middleware for Botkit developers using the BotBuilder SlackAdapter class.
- * This middleware causes Botkit to emit more specialized events for the different types of message that Slack might send.
- * Responsible for classifying messages:
- *
- *      * `direct_message` events are messages received through 1:1 direct messages with the bot
- *      * `direct_mention` events are messages that start with a mention of the bot, i.e "@mybot hello there"
- *      * `mention` events are messages that include a mention of the bot, but not at the start, i.e "hello there @mybot"
- *
- * In addition, messages from bots and changing them to `bot_message` events. All other types of message encountered remain `message` events.
- *
- * To use this, bind it to the adapter before creating the Botkit controller:
- * ```C#
- * const var adapter = new SlackAdapter(options);
- * adapter.use(new SlackMessageTypeMiddleware());
- * const car controller = new Botkit({
- *      adapter: adapter,
- *      // ...
- * });
- * ```
- */
-
 namespace botbuilder_slack_adapter
 {
+    /// <summary>
+    /// A middleware for Botkit developers using the BotBuilder SlackAdapter class.
+    /// This middleware causes Botkit to emit more specialized events for the different types of message that Slack might send.
+    /// Responsible for classifying messages:
+    ///      * `direct_message` events are messages received through 1:1 direct messages with the bot
+    ///      * `direct_mention` events are messages that start with a mention of the bot, i.e "@mybot hello there"
+    ///      * `mention` events are messages that include a mention of the bot, but not at the start, i.e "hello there @mybot"
+    /// In addition, messages from bots and changing them to `bot_message` events. All other types of message encountered remain `message` events.
+    /// </summary>
     public class SlackMessageTypeMiddleware : MiddlewareSet
     {
         /// <summary>
@@ -48,7 +35,7 @@ namespace botbuilder_slack_adapter
             {
                 var adapter = context.Adapter as SlackAdapter;
 
-                string bot_user_id = await adapter.GetBotUserByTeam(context.Activity); // TODO const
+                string bot_user_id = await adapter.GetBotUserByTeam(context.Activity);
                 var mentionSyntax = "<@" + bot_user_id + "(\\|.*?)?>";
                 var mention = new Regex(mentionSyntax, RegexOptions.IgnoreCase);
                 var direct_mention = new Regex('^' + mentionSyntax, RegexOptions.IgnoreCase);
@@ -84,10 +71,7 @@ namespace botbuilder_slack_adapter
                 {
                     (context.Activity.ChannelData as dynamic).botkitEventType = "mention";
                 }
-                else
-                {
-                    // this is an "ambient" message
-                }
+                // else, this is an "ambient" message
 
                 // if this is a message from a bot, we probably want to ignore it.
                 // switch the botkit event type to bot_message
