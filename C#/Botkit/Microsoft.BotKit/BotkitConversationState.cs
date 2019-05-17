@@ -1,12 +1,11 @@
+// Copyright(c) Microsoft Corporation.All rights reserved.
+// Licensed under the MIT License.
+
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Schema;
 
-namespace BotkitLibrary
+namespace Microsoft.BotKit
 {
     /// <summary>
     ///  A customized version of ConversationState that override the getStorageKey method to create a more complex key value.

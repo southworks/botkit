@@ -1,13 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+// Copyright(c) Microsoft Corporation.All rights reserved.
+// Licensed under the MIT License.
+
 using System.Threading.Tasks;
-using BotkitLibrary.Core;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Schema;
+using Microsoft.BotKit.Core;
 
-namespace BotkitLibrary
+namespace Microsoft.BotKit
 {
     /// <summary>
     /// A base class for a `bot` instance, an object that contains the information and functionality for taking action in response to an incoming message.
@@ -22,7 +21,7 @@ namespace BotkitLibrary
         /// </summary>
         /// <param name="controller">A pointer to the main Botkit controller</param>
         /// <param name="config">An object typically containing { dialogContext, reference, context, activity }</param>
-        public BotWorker(Botkit controller, object config)
+        public BotWorker(Core.Botkit controller, object config)
         {
             Controller = controller;
         }
@@ -59,6 +58,18 @@ namespace BotkitLibrary
         }
 
         /// <summary>
+        /// Send a message using whatever context the bot was spawned in or set using changeContext() --
+        /// or more likely, one of the platform-specific helpers like startPrivateConversation() (Slack), startConversationWithUser() (Twilio SMS), and 
+        /// startConversationWithUser() (Facebook Messenger) Be sure to check the platform documentation for others - most adapters include at least one.
+        /// </summary>
+        /// <param name="message">A string containing the text of a reply, or more fully formed message object</param>
+        /// <returns>Return value will contain the results of the send action, typically {id: <id of message>}</returns>
+        public async Task<object> Say(string message)
+        {
+            return new object();
+        }
+
+        /// <summary>
         /// Reply to an incoming message.
         /// Message will be sent using the context of the source message, which may in some cases be different than the context used to spawn the bot.
         /// </summary>
@@ -71,12 +82,24 @@ namespace BotkitLibrary
         }
 
         /// <summary>
+        /// Reply to an incoming message.
+        /// Message will be sent using the context of the source message, which may in some cases be different than the context used to spawn the bot.
+        /// </summary>
+        /// <param name="message">An incoming message, usually passed in to a handler function</param>
+        /// <param name="response">A string containing the text of a reply, or more fully formed message object</param>
+        /// <returns>Return value will contain the results of the send action, typically {id: <id of message>}</returns>
+        public async Task<object> Reply(IBotkitMessage message, string response)
+        {
+            return new object();
+        }
+
+        /// <summary>
         /// Begin a pre-defined dialog by specifying its id. The dialog will be started in the same context (same user, same channel) in which the original incoming message was received.
         /// See "Using Dialogs" in the core documentation.
         /// </summary>
         /// <param name="id">ID of dialog</param>
-        /// <param name="any">Object containing options to be passed into the dialog</param>
-        public async void BeginDialog(string id, object any)
+        /// <param name="options">Object containing options to be passed into the dialog</param>
+        public async void BeginDialog(string id, object options)
         {
 
         }
@@ -95,7 +118,7 @@ namespace BotkitLibrary
         /// </summary>
         /// <param name="id">ID of dialog</param>
         /// <param name="options">Object containing options to be passed into the dialog</param>
-        public async void ReplaceDialog(string id, object options)
+        public async Task ReplaceDialog(string id, object options)
         {
 
         }
@@ -107,7 +130,7 @@ namespace BotkitLibrary
         /// <param name="reference">A ConversationReference, most likely captured from an incoming message and stored for use in proactive messaging scenarios.</param>
         public async Task<BotWorker> ChangeContext(ConversationReference reference)
         {
-            return new BotWorker(new Botkit(new BotkitConfiguration()), new object());
+            return new BotWorker(new Core.Botkit(new BotkitConfiguration()), new object());
         }
 
 

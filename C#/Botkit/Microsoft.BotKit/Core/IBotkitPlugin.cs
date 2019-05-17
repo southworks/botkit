@@ -1,15 +1,15 @@
+// Copyright(c) Microsoft Corporation.All rights reserved.
+// Licensed under the MIT License.
+
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
-namespace BotkitLibrary.Core
+namespace Microsoft.BotKit.Core
 {
     public interface IBotkitPlugin
     {
         string Name { get; set; }
-        Action<Botkit> Init { get; set; }
+        Task Init(Botkit botkit);
         Tuple<string, object[]> Middlewares { get; set; }
     }
 }
