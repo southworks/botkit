@@ -7,18 +7,19 @@ using Microsoft.Bot.Schema;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace botbuilder_slack_adapter
 {
-    class SlackEventMiddleware : MiddlewareSet
+    public class SlackEventMiddleware : MiddlewareSet
     {
         /// <summary>
         /// A middleware for Botkit developers using the BotBuilder SlackAdapter class.
         /// This middleware causes Botkit to emit message events by their `type` or `subtype` field rather than their default BotBuilder Activity type(limited to message or event).
         /// This keeps the new Botkit behavior consistent withprevious versions, and provides helpful filtering on the many event types that Slack sends.
         /// </summary>
-        public async void OnTurn(TurnContext context, Func<Task<object>> next)
+        public async void OnTurn(TurnContext context, NextDelegate next, CancellationToken cancellationToken = default(CancellationToken))
         {
             if ((context.Activity.Type == ActivityTypes.Event))
             {
@@ -33,7 +34,7 @@ namespace botbuilder_slack_adapter
                 }
             }
 
-            await next();
+            await next(cancellationToken).ConfigureAwait(false);
         }
     }
 }
