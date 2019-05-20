@@ -21,7 +21,7 @@ namespace Microsoft.BotKit
         /// </summary>
         /// <param name="controller">A pointer to the main Botkit controller</param>
         /// <param name="config">An object typically containing { dialogContext, reference, context, activity }</param>
-        public BotWorker(Core.Botkit controller, object config)
+        public BotWorker(Botkit controller, object config)
         {
             Controller = controller;
         }
@@ -130,7 +130,7 @@ namespace Microsoft.BotKit
         /// <param name="reference">A ConversationReference, most likely captured from an incoming message and stored for use in proactive messaging scenarios.</param>
         public async Task<BotWorker> ChangeContext(ConversationReference reference)
         {
-            return new BotWorker(new Core.Botkit(new BotkitConfiguration()), new object());
+            return new BotWorker(new Botkit(new BotkitConfiguration()), new object());
         }
 
 

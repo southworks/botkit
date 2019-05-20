@@ -9,7 +9,7 @@ namespace Microsoft.BotKit.CMS
 {
     public class BotkitCMSHelper
     {
-        public BotkitCMSHelper(Core.Botkit botkit, CMSConfiguration configuration)
+        public BotkitCMSHelper(Botkit botkit, CMSConfiguration configuration)
         {
 
         }
