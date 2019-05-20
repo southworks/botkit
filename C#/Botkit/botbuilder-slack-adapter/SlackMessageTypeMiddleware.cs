@@ -1,7 +1,6 @@
-//
 // Copyright(c) Microsoft Corporation.All rights reserved.
 // Licensed under the MIT License.
-// 
+
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Schema;
 using System;
@@ -35,10 +34,10 @@ namespace botbuilder_slack_adapter
             {
                 var adapter = context.Adapter as SlackAdapter;
 
-                string bot_user_id = await adapter.GetBotUserByTeam(context.Activity);
-                var mentionSyntax = "<@" + bot_user_id + "(\\|.*?)?>";
+                string botUserId = await adapter.GetBotUserByTeam(context.Activity);
+                var mentionSyntax = "<@" + botUserId + "(\\|.*?)?>";
                 var mention = new Regex(mentionSyntax, RegexOptions.IgnoreCase);
-                var direct_mention = new Regex('^' + mentionSyntax, RegexOptions.IgnoreCase);
+                var directMention = new Regex('^' + mentionSyntax, RegexOptions.IgnoreCase);
 
                 // is this a DM, a mention, or just ambient messages passing through?
                 if ((context.Activity.ChannelData as dynamic)?.channel_type == "im")
@@ -49,12 +48,12 @@ namespace botbuilder_slack_adapter
                     Regex.Replace(
                         Regex.Replace(
                             Regex.Replace(
-                                Regex.Replace(context.Activity.Text, direct_mention.ToString(), ""), 
+                                Regex.Replace(context.Activity.Text, directMention.ToString(), ""), 
                                 @"/ ^\s +/", ""), 
                             @"/ ^:\s +/", ""), 
                         @"/ ^\s +/", "");
                 }
-                else if (!string.IsNullOrEmpty(bot_user_id) && !string.IsNullOrEmpty(context.Activity.Text) && context.Activity.Text.Equals(direct_mention))
+                else if (!string.IsNullOrEmpty(botUserId) && !string.IsNullOrEmpty(context.Activity.Text) && context.Activity.Text.Equals(directMention))
                 {
                     (context.Activity.ChannelData as dynamic).botkitEventType = "direct_mention";
 
@@ -62,23 +61,22 @@ namespace botbuilder_slack_adapter
                     Regex.Replace(
                         Regex.Replace(
                             Regex.Replace(
-                                Regex.Replace(context.Activity.Text, direct_mention.ToString(), ""),
+                                Regex.Replace(context.Activity.Text, directMention.ToString(), ""),
                                 @"/ ^\s +/", ""),
                             @"/ ^:\s +/", ""),
                         @"/ ^\s +/", "");
                 }
-                else if (!string.IsNullOrEmpty(bot_user_id) && string.IsNullOrEmpty(context.Activity.Text) && context.Activity.Text.Equals(mention))
+                else if (!string.IsNullOrEmpty(botUserId) && string.IsNullOrEmpty(context.Activity.Text) && context.Activity.Text.Equals(mention))
                 {
                     (context.Activity.ChannelData as dynamic).botkitEventType = "mention";
                 }
-                // else, this is an "ambient" message
 
                 // if this is a message from a bot, we probably want to ignore it.
                 // switch the botkit event type to bot_message
                 // and the activity type to Event <-- will stop it from being included in dialogs
                 // NOTE: This catches any message from any bot, including this bot.
-                // Note also, bot_id here is not the same as bot_user_id so we can't (yet) identify messages originating from this bot without doing an additional API call.
-                if ((context.Activity.ChannelData as dynamic)?.bot_id != null)
+                // Note also, botId here is not the same as bot_user_id so we can't (yet) identify messages originating from this bot without doing an additional API call.
+                if ((context.Activity.ChannelData as dynamic)?.botId != null)
                 {
                     (context.Activity.ChannelData as dynamic).botkitEventType = "bot_message";
                     context.Activity.Type = ActivityTypes.Event;
