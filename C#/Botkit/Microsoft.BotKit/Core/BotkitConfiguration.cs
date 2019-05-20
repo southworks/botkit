@@ -1,18 +1,16 @@
+// Copyright(c) Microsoft Corporation.All rights reserved.
+// Licensed under the MIT License.
+
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Adapters;
 using Microsoft.Bot.Builder;
 
-namespace BotkitLibrary.Core
+namespace Microsoft.BotKit.Core
 {
     public class BotkitConfiguration
     {
         public string WebhookUri { get; set; }
         public string DialogStateProperty { get; set; }
-        public Adapter Adapter { get; set; }
+        public BotkitFrameworkAdapter Adapter { get; set; } // TO-DO: compare with TS implementation
         public Tuple<AdapterKey, string> AdapterConfig { get; set; }
         public IWebserver Webserver { get; set; }
         public IStorage Storage { get; set; }

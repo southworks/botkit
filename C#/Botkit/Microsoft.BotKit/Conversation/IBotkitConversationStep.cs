@@ -1,13 +1,13 @@
+// Copyright(c) Microsoft Corporation.All rights reserved.
+// Licensed under the MIT License.
+
 using Microsoft.Bot.Builder.Dialogs;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
-namespace BotkitLibrary.Conversation
+namespace Microsoft.BotKit.Conversation
 {
-    public interface IBotkitConvoStep
+    public interface IBotkitConversationStep
     {
         /// <summary>
         /// The number pointing to the current message in the current thread in this dialog's script
@@ -47,6 +47,6 @@ namespace BotkitLibrary.Conversation
         /// <summary>
         /// A function to call when the step is completed.
         /// </summary>
-        Func<object, object> Next { get; set; }
+        Task Next(Object stepresult);
     }
 }

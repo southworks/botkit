@@ -1,12 +1,11 @@
-using BotkitLibrary.Conversation;
+// Copyright(c) Microsoft Corporation.All rights reserved.
+// Licensed under the MIT License.
+
+using Microsoft.BotKit.Conversation;
 using Microsoft.Bot.Builder.Dialogs;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace BotkitLibrary
+namespace Microsoft.BotKit
 {
     public class BotkitDialogWrapper
     {
@@ -15,7 +14,7 @@ namespace BotkitLibrary
         /// </summary>
         public Tuple<string, object> Vars { get; set; }
 
-        public BotkitDialogWrapper(DialogContext dialogContext, IBotkitConvoStep botkitconvoStep)
+        public BotkitDialogWrapper(DialogContext dialogContext, IBotkitConversationStep botkitconvoStep)
         {
 
         }

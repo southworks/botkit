@@ -1,12 +1,12 @@
-using BotkitLibrary.Core;
+// Copyright(c) Microsoft Corporation.All rights reserved.
+// Licensed under the MIT License.
+
+using Microsoft.BotKit.Core;
 using Microsoft.Bot.Builder.Dialogs;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
-namespace BotkitLibrary.Conversation
+namespace Microsoft.BotKit.Conversation
 {
     public class BotkitConversation
     {
@@ -120,9 +120,10 @@ namespace BotkitLibrary.Conversation
         /// </summary>
         /// <param name="threadName">A valid thread defined in this conversation</param>
         /// <param name="">A handler function in the form async(convo, bot) => { ... }</param>
-        public void Before(string threadName, Func<BotkitDialogWrapper, BotWorker, object>)
+        public void Before(string threadName, Object obj)
         {
-
+            // TO-DO: review method firm for matching this:
+            // public void Before(string threadName, Func<BotkitDialogWrapper, BotWorker, object>)
         }
 
         /// <summary>
@@ -131,7 +132,7 @@ namespace BotkitLibrary.Conversation
         /// <param name="threadName">The thread about to begin</param>
         /// <param name="dialogContext">The current DialogContext</param>
         /// <param name="step">The current step object</param>
-        public async void RunBefore(string threadName, DialogContext dialogContext, IBotkitConvoStep step)
+        public async void RunBefore(string threadName, DialogContext dialogContext, IBotkitConversationStep step)
         {
 
         }

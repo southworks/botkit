@@ -1,15 +1,13 @@
+// Copyright(c) Microsoft Corporation.All rights reserved.
+// Licensed under the MIT License.
+
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Dialogs;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace BotkitLibrary.Core
+namespace Microsoft.BotKit.Core
 {
     public class Botkit
     {
@@ -154,7 +152,7 @@ namespace BotkitLibrary.Core
         /// This will ensure that the calls will not be made until all of the components have successfully been initialized.
         /// </summary>
         /// <param name="handler">A function to run when Botkit is booted and ready to run.</param>
-        public void Ready(Func<object> handler)
+        public void Ready(Task<object> handler)
         {
 
         }
@@ -239,7 +237,7 @@ namespace BotkitLibrary.Core
         /// <returns></returns>
         public async Task<BotWorker> Spawn(object config)
         {
-            return new BotWorker(new Botkit(new BotkitConfiguration()));
+            return new BotWorker(new Botkit(new BotkitConfiguration()), config);
         }
 
         /// <summary>

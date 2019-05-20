@@ -1,10 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+// Copyright(c) Microsoft Corporation.All rights reserved.
+// Licensed under the MIT License.
 
-namespace BotkitLibrary.Conversation
+namespace Microsoft.BotKit.Conversation
 {
     /// <summary>
     /// Template for defining a BotkitConversation template
@@ -14,7 +11,7 @@ namespace BotkitLibrary.Conversation
         string[] Text {get; set; }
         string Action { get; set; }
         Execute Execute { get; set; }
-        object[] QuickReplies { get; set; } // Validate this line
+        object[] QuickReplies { get; set; } // TO-DO: Validate this line
         object[] Attachments { get; set; }
         object ChannelData { get; set; }
         Collect Collect { get; set; }
