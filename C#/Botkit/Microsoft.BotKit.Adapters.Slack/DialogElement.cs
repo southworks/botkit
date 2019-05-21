@@ -11,7 +11,7 @@ namespace Microsoft.BotKit.Adapters.Slack
         public string Name { get; set; }
         public string Value { get; set; }
         public Dictionary<string, string> OptionList { get; set; }
-        public object Options { get; set; }
+        public ISlackAdapterOptions Options { get; set; }
         public string Type { get; set; }
         public string Subtype { get; set; }
     }
