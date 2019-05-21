@@ -1,22 +1,71 @@
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Schema;
+using SlackAPI;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace botbuilder_slack_adapter
 {
     public class SlackAdapter : BotAdapter
     {
+        private readonly ISlackAdapterOptions options;
+        private readonly SlackAPI Slack;
+        private readonly string Identity;
+        public Task<Action<SlackBotWorker, Task<object>>>[] Middlewares;
+
         /// <summary>
         /// Create a Slack adapter.
         /// </summary>
         /// <param name="options">An object containing API credentials, a webhook verification token and other options</param>
         public SlackAdapter(ISlackAdapterOptions options) : base()
         {
+            //this.options = options;
 
+            //if (this.options.VerificationToken != null && this.options.ClientSigningSecret != null)
+            //{
+            //    string warning =
+            //        "****************************************************************************************" +
+            //        "* WARNING: Your bot is operating without recommended security mechanisms in place.     *" +
+            //        "* Initialize your adapter with a clientSigningSecret parameter to enable               *" +
+            //        "* verification that all incoming webhooks originate with Slack:                        *" +
+            //        "*                                                                                      *" +
+            //        "* var adapter = new SlackAdapter({clientSigningSecret: <my secret from slack>});       *" +
+            //        "*                                                                                      *" +
+            //        "****************************************************************************************" +
+            //        ">> Slack docs: https://api.slack.com/docs/verifying-requests-from-slack";
+
+            //    throw new Exception(warning + Environment.NewLine + "Required: include a verificationToken or clientSigningSecret to verify incoming Events API webhooks");
+            //}
+
+            //if (this.options.BotToken != null)
+            //{
+            //    Slack = new SlackAPI(this.options.BotToken);
+            //    Identity = Slack.GetIdentity();
+            //}
+            //else if (
+            //    string.IsNullOrEmpty(options.ClientId) ||
+            //    string.IsNullOrEmpty(options.ClientSecret) ||
+            //    string.IsNullOrEmpty(options.RedirectUri) ||
+            //    options.Scopes.Length > 0)
+            //{
+            //    throw new Exception("Missing Slack API credentials! Provide clientId, clientSecret, scopes and redirectUri as part of the SlackAdapter options.");
+            //}
+
+            // TODO: migrate middleware
+            //this.middlewares = {
+            //    spawn: [
+            //        async (bot, next) => {
+            //            // make the Slack API available to all bot instances.
+            //            bot.api = await this.getAPI(bot.getConfig('activity')).catch((err) => {
+            //                debug('An error occurred while trying to get API creds for team', err);
+            //                return next(new Error('Could not spawn a Slack API instance'));
+            //            });
+
+            //            next();
+            //        }
+            //    ]
+            //};
         }
 
         /// <summary>
@@ -25,9 +74,18 @@ namespace botbuilder_slack_adapter
         /// </summary>
         /// <param name="activity"></param>
         /// <returns></returns>
-        public async Task<object> GetAPI(Activity activity)
+        public async Task<SlackAPI> GetAPI(Activity activity)
         {
-            return new object();
+            return Slack;
+            //if (Slack != null)
+            //{
+            //    return Slack;
+            //}
+            //else
+            //{
+            //    // 'team' in 'activity.Conversation.team' is missing
+                
+            //}
         }
 
         /// <summary>
@@ -39,7 +97,7 @@ namespace botbuilder_slack_adapter
         /// <returns></returns>
         public async Task<string> GetBotUserByTeam(Activity activity)
         {
-
+            return "";
         }
 
         /// <summary>
@@ -78,7 +136,7 @@ namespace botbuilder_slack_adapter
         /// <param name="activities">An array of outgoing activities to be sent back to the messaging API.</param>
         public async Task<ResourceResponse[]> SendActivities(TurnContext context, Activity[] activities)
         {
-
+            return new ResourceResponse[0];
         }
 
         /// <summary>
@@ -120,6 +178,21 @@ namespace botbuilder_slack_adapter
         public async void ProcessActivity(object req, object res, Action<TurnContext> logic)
         {
 
+        }
+
+        public override Task<ResourceResponse[]> SendActivitiesAsync(ITurnContext turnContext, Activity[] activities, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<ResourceResponse> UpdateActivityAsync(ITurnContext turnContext, Activity activity, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task DeleteActivityAsync(ITurnContext turnContext, ConversationReference reference, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
         }
     }
 }
