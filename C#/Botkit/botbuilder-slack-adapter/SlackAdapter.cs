@@ -131,6 +131,7 @@ namespace botbuilder_slack_adapter
         /// <param name="code">The value found in `req.query.code` as part of Slack's response to the oauth flow.</param>
         public async Task<object> ValidateOauthCode(string code)
         {
+            // TODO: Implement 'slack.oauth.access' in 'SlackApi'
             return new object();
         }
 
