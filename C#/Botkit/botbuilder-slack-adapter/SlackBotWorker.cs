@@ -1,10 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+// Copyright(c) Microsoft Corporation.All rights reserved.
+// Licensed under the MIT License.
+
+using Microsoft.BotKit;
+using Microsoft.BotKit.Core;
 using System.Threading.Tasks;
-using BotkitLibrary;
-using BotkitLibrary.Core;
 
 namespace botbuilder_slack_adapter
 {
