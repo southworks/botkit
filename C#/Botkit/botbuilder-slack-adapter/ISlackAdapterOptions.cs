@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 
 namespace botbuilder_slack_adapter
 {
-    interface ISlackAdapterOptions
+    public interface ISlackAdapterOptions
     {
         /// <summary>
         /// Legacy method for validating the origin of incoming webhooks.
