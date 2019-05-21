@@ -15,6 +15,7 @@ namespace botbuilder_slack_adapter
         private readonly ISlackAdapterOptions options;
         private readonly SlackAPI Slack;
         private readonly string Identity;
+        private readonly string SlackOAuthURL = "https://slack.com/oauth/authorize?client_id=";
         public Task<Action<SlackBotWorker, Task<object>>>[] Middlewares;
 
         /// <summary>
@@ -118,7 +119,9 @@ namespace botbuilder_slack_adapter
         /// <returns>A url pointing to the first step in Slack's oauth flow.</returns>
         public string GetInstallLink()
         {
-            return "";
+            return (!string.IsNullOrEmpty(options.ClientId) && options.Scopes.Length > 0)
+                ? SlackOAuthURL + options.ClientId + "&scope=" + string.Join(",", options.Scopes)
+                : throw new Exception("getInstallLink() cannot be called without clientId and scopes in adapter options.");
         }
 
         /// <summary>
