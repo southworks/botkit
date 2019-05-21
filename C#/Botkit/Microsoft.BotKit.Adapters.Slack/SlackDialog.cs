@@ -57,7 +57,7 @@ namespace Microsoft.BotKit.Adapters.Slack
         /// <param name="value">Value for the callback_id.</param>
         public void SetCallbackId(string value)
         {
-            data.Title = value;
+            data.CallbackId = value;
         }
 
         /// <summary>
