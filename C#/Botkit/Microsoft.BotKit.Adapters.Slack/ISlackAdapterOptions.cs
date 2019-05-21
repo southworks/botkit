@@ -3,7 +3,7 @@
 
 using System.Threading.Tasks;
 
-namespace botbuilder_slack_adapter
+namespace Microsoft.BotKit.Adapters.Slack
 {
     public interface ISlackAdapterOptions
     {
