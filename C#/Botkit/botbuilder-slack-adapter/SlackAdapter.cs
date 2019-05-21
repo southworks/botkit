@@ -100,7 +100,16 @@ namespace botbuilder_slack_adapter
         /// <returns></returns>
         public async Task<string> GetBotUserByTeam(Activity activity)
         {
-            return "";
+            if (!string.IsNullOrEmpty(Identity))
+            {
+                return Identity;
+            }
+            else
+            {
+                // 'team' in 'activity.Conversation.team' is missing
+                var userId = ""; //await options.GetBotUserByTeam(activity.Conversation.team);
+                return string.IsNullOrEmpty(userId) ? userId : throw new Exception("Missing credentials for team.");
+            }
         }
 
         /// <summary>
