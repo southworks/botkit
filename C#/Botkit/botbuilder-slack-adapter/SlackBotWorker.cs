@@ -1,10 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using Microsoft.BotKit;
+using Microsoft.BotKit.Core;
 using System.Threading.Tasks;
-using BotkitLibrary;
-using BotkitLibrary.Core;
 
 namespace botbuilder_slack_adapter
 {
