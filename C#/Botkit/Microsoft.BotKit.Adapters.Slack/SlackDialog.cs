@@ -83,7 +83,7 @@ namespace Microsoft.BotKit.Adapters.Slack
 
             element = label;
                
-            if (options.GetType().ToString() == "DialogElement")
+            if (options.GetType() == typeof(DialogElement))
             {
                 element = (DialogElement)options;
             }
@@ -112,7 +112,7 @@ namespace Microsoft.BotKit.Adapters.Slack
                 Subtype = subtype
             };
 
-            if (options.GetType().ToString() == "DialogElement")
+            if (options.GetType() == typeof(DialogElement))
             {
                 element = (DialogElement)options;
             }
@@ -182,7 +182,7 @@ namespace Microsoft.BotKit.Adapters.Slack
 
             element = label;
 
-            if (options.GetType().ToString() == "DialogElement")
+            if (options.GetType() == typeof(DialogElement))
             {
                 element = (DialogElement)options;
             }
@@ -211,7 +211,7 @@ namespace Microsoft.BotKit.Adapters.Slack
                 Subtype = subtype
             };
 
-            if (options.GetType().ToString() == "DialogElement")
+            if (options.GetType() == typeof(DialogElement))
             {
                 element = (DialogElement)options;
             }
@@ -240,7 +240,7 @@ namespace Microsoft.BotKit.Adapters.Slack
                 OptionList = optionList,
             };
 
-            if (options.GetType().ToString() == "DialogElement")
+            if (options.GetType() == typeof(DialogElement))
             {
                 element = (DialogElement)options;
             }
@@ -253,13 +253,13 @@ namespace Microsoft.BotKit.Adapters.Slack
         /// </summary>
         public string AsString()
         {
-            return JsonConvert.ToString(this.data.ToString());
+            return JsonConvert.ToString(data.ToString());
         }
 
         /// <summary>
         /// Get the dialog object for use with bot.replyWithDialog() 
         /// </summary>
-        public object AsObject()
+        public DialogData AsObject()
         {
             return data;
         }
