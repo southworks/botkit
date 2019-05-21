@@ -23,37 +23,37 @@ namespace botbuilder_slack_adapter
         /// <param name="options">An object containing API credentials, a webhook verification token and other options</param>
         public SlackAdapter(ISlackAdapterOptions options) : base()
         {
-            //this.options = options;
+            this.options = options;
 
-            //if (this.options.VerificationToken != null && this.options.ClientSigningSecret != null)
-            //{
-            //    string warning =
-            //        "****************************************************************************************" +
-            //        "* WARNING: Your bot is operating without recommended security mechanisms in place.     *" +
-            //        "* Initialize your adapter with a clientSigningSecret parameter to enable               *" +
-            //        "* verification that all incoming webhooks originate with Slack:                        *" +
-            //        "*                                                                                      *" +
-            //        "* var adapter = new SlackAdapter({clientSigningSecret: <my secret from slack>});       *" +
-            //        "*                                                                                      *" +
-            //        "****************************************************************************************" +
-            //        ">> Slack docs: https://api.slack.com/docs/verifying-requests-from-slack";
+            if (this.options.VerificationToken != null && this.options.ClientSigningSecret != null)
+            {
+                string warning =
+                    "****************************************************************************************" +
+                    "* WARNING: Your bot is operating without recommended security mechanisms in place.     *" +
+                    "* Initialize your adapter with a clientSigningSecret parameter to enable               *" +
+                    "* verification that all incoming webhooks originate with Slack:                        *" +
+                    "*                                                                                      *" +
+                    "* var adapter = new SlackAdapter({clientSigningSecret: <my secret from slack>});       *" +
+                    "*                                                                                      *" +
+                    "****************************************************************************************" +
+                    ">> Slack docs: https://api.slack.com/docs/verifying-requests-from-slack";
 
-            //    throw new Exception(warning + Environment.NewLine + "Required: include a verificationToken or clientSigningSecret to verify incoming Events API webhooks");
-            //}
+                throw new Exception(warning + Environment.NewLine + "Required: include a verificationToken or clientSigningSecret to verify incoming Events API webhooks");
+            }
 
-            //if (this.options.BotToken != null)
-            //{
-            //    Slack = new SlackAPI(this.options.BotToken);
-            //    Identity = Slack.GetIdentity();
-            //}
-            //else if (
-            //    string.IsNullOrEmpty(options.ClientId) ||
-            //    string.IsNullOrEmpty(options.ClientSecret) ||
-            //    string.IsNullOrEmpty(options.RedirectUri) ||
-            //    options.Scopes.Length > 0)
-            //{
-            //    throw new Exception("Missing Slack API credentials! Provide clientId, clientSecret, scopes and redirectUri as part of the SlackAdapter options.");
-            //}
+            if (this.options.BotToken != null)
+            {
+                Slack = new SlackAPI(this.options.BotToken);
+                Identity = Slack.GetIdentity();
+            }
+            else if (
+                string.IsNullOrEmpty(options.ClientId) ||
+                string.IsNullOrEmpty(options.ClientSecret) ||
+                string.IsNullOrEmpty(options.RedirectUri) ||
+                options.Scopes.Length > 0)
+            {
+                throw new Exception("Missing Slack API credentials! Provide clientId, clientSecret, scopes and redirectUri as part of the SlackAdapter options.");
+            }
 
             // TODO: migrate middleware
             //this.middlewares = {
@@ -79,16 +79,16 @@ namespace botbuilder_slack_adapter
         /// <returns></returns>
         public async Task<SlackAPI> GetAPI(Activity activity)
         {
-            return Slack;
-            //if (Slack != null)
-            //{
-            //    return Slack;
-            //}
-            //else
-            //{
-            //    // 'team' in 'activity.Conversation.team' is missing
-                
-            //}
+            if (Slack != null)
+            {
+                return Slack;
+            }
+            else
+            {
+                // 'team' in 'activity.Conversation.team' is missing
+                var token = ""; //await options.GetTokenForTeam(activity.Conversation.team);
+                return string.IsNullOrEmpty(token) ? new SlackAPI(token) : throw new Exception("Missing credentials for team.");
+            }
         }
 
         /// <summary>
