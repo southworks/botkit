@@ -142,6 +142,29 @@ namespace botbuilder_slack_adapter
         /// <returns>A Slack message object with {text, attachments, channel, thread_ts} as well as any fields found in activity.channelData</returns>
         public object ActivityToSlack(Activity activity)
         {
+            var channelId = activity.Conversation.Id;
+            // TODO: Implement Thread_TS
+            var threadTs = ""; //activity.Conversation.ThreadTs
+
+            // if channelData is specified, overwrite any fields in message object
+            if (activity.ChannelData != null)
+            {
+                //Object.keys(activity.channelData).forEach(function(key) {
+                //    message[key] = activity.channelData[key];
+                //});
+            }
+
+            // should this message be sent as an ephemeral message
+            //if (message.ephemeral)
+            //{
+            //    message.user = activity.recipient.id;
+            //}
+
+            //if (message.icon_url || message.icon_emoji || message.username)
+            //{
+            //    message.as_user = false;
+            //}
+
             return new object();
         }
 
