@@ -1,3 +1,6 @@
+// Copyright(c) Microsoft Corporation.All rights reserved.
+// Licensed under the MIT License.
+
 using Microsoft.BotKit;
 using Microsoft.BotKit.Core;
 using System.Threading.Tasks;
