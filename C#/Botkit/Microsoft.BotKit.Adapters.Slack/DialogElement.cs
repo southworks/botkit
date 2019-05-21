@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace botbuilder_slack_adapter
+namespace Microsoft.BotKit.Adapters.Slack
 {
     public class DialogElement
     {

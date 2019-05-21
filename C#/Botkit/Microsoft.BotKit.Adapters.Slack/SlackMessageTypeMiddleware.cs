@@ -8,9 +8,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 
-namespace botbuilder_slack_adapter
+namespace Microsoft.BotKit.Adapters.Slack
 {
     /// <summary>
     /// A middleware for Botkit developers using the BotBuilder SlackAdapter class.
@@ -28,7 +29,7 @@ namespace botbuilder_slack_adapter
         /// </summary>
         /// <param name="context"></param>
         /// <param name=""></param>
-        public async void OnTurn(TurnContext context, Func<Task<object>> next)
+        public async void OnTurn(TurnContext context, NextDelegate next, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (context.Activity.Type == "message" && context.Activity.ChannelData != null)
             {
@@ -82,7 +83,7 @@ namespace botbuilder_slack_adapter
                     context.Activity.Type = ActivityTypes.Event;
                 }
             }
-            await next();
+            await next(cancellationToken).ConfigureAwait(false);
         }
     }
 }

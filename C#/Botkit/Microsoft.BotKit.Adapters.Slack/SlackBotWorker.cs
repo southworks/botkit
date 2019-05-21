@@ -5,7 +5,7 @@ using Microsoft.BotKit;
 using Microsoft.BotKit.Core;
 using System.Threading.Tasks;
 
-namespace botbuilder_slack_adapter
+namespace Microsoft.BotKit.Adapters.Slack
 {
     public class SlackBotWorker : BotWorker
     {
