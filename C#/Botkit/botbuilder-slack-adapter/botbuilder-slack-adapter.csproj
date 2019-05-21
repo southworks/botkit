@@ -8,6 +8,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Bot.Builder" Version="4.4.3" />
     <PackageReference Include="Microsoft.Bot.Schema" Version="4.4.3" />
+    <PackageReference Include="SlackAPI" Version="1.1.0" />
   </ItemGroup>
 
   <ItemGroup>
