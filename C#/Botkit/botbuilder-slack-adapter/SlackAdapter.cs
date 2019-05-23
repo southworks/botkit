@@ -295,7 +295,7 @@ namespace botbuilder_slack_adapter
         /// <param name="logic">A bot logic function that will perform continuing action in the form `async(context) => { ... }`</param>
         public async Task<Task> ContinueConversation(ConversationReference reference, BotCallbackHandler logic)
         {
-            //var request = 
+            var request = reference.GetContinuationActivity().ApplyConversationReference(reference, true); // TODO: check on this
             
             TurnContext context = new TurnContext(this, request);
 
