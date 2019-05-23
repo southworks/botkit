@@ -290,13 +290,13 @@ namespace botbuilder_slack_adapter
         /// </summary>
         /// <param name="reference">A conversation reference to be applied to future messages.</param>
         /// <param name="logic">A bot logic function that will perform continuing action in the form `async(context) => { ... }`</param>
-        public async void ContinueConversation(ConversationReference reference, Action<TurnContext> logic)
+        public async Task<Task> ContinueConversation(ConversationReference reference, BotCallbackHandler logic)
         {
             //var request = 
             
             TurnContext context = new TurnContext(this, request);
 
-            return this.RunPipelineAsync(context, logic, new CancellationToken());
+            return RunPipelineAsync(context, logic, new CancellationToken());
         }
 
         /// <summary>
@@ -305,7 +305,7 @@ namespace botbuilder_slack_adapter
         /// <param name="req">A request object from Restify or Express</param>
         /// <param name="res">A response object from Restify or Express</param>
         /// <param name="logic">A bot logic function in the form `async(context) => { ... }`</param>
-        public async void ProcessActivity(dynamic req, dynamic res, Action<TurnContext> logic)
+        public async void ProcessActivity(dynamic req, dynamic res, BotCallbackHandler logic)
         {
             // Create an Activity based on the incoming message from Slack.
             // There are a few different types of event that Slack might send.
@@ -363,7 +363,7 @@ namespace botbuilder_slack_adapter
                     var context = new TurnContext(this, activity);
                     context.TurnState.Add("httpStatus", "200");
 
-                    await RunPipelineAsync(context, logic, /***/);
+                    await RunPipelineAsync(context, logic, new CancellationToken());
 
                     // send http response back
                     res.status(context.TurnState.Get<string>("httpStatus"));
@@ -433,7 +433,7 @@ namespace botbuilder_slack_adapter
 
                     context.TurnState.Add("httpStatus", "200");
 
-                    await RunPipelineAsync(context, logic, /***/);
+                    await RunPipelineAsync(context, logic, new CancellationToken());
 
                     // send http response back
                     res.status(context.TurnState.Get<string>("httpStatus"));
@@ -495,7 +495,7 @@ namespace botbuilder_slack_adapter
 
                     context.TurnState.Add("httpStatus", "200");
 
-                    await RunPipelineAsync(context, logic, /***/);
+                    await RunPipelineAsync(context, logic, new CancellationToken());
 
                     // send http response back
                     res.status(context.TurnState.Get<string>("httpStatus"));
@@ -515,9 +515,9 @@ namespace botbuilder_slack_adapter
             }
         }
         
-        private /*async Task<bool>*/ bool VerifySignatureAsync(HttpWebRequest req, HttpWebResponse res)
+        private bool VerifySignatureAsync(HttpWebRequest req, HttpWebResponse res)
         {
-            if (options.ClientSigningSecret != null && req.rawBody)
+            /*if (options.ClientSigningSecret != null && req.rawBody)
             {
                 var timestamp = req.Headers;
                 var body = req.rawBody;
@@ -545,7 +545,7 @@ namespace botbuilder_slack_adapter
                     res.status(401);
                     return false;
                 }
-            }
+            }*/
 
             return true;
         }
