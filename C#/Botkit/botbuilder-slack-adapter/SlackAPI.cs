@@ -14,9 +14,9 @@ namespace botbuilder_slack_adapter
         private readonly string Token;
         private SlackSocketClient client;
 
-        public SlackAPI(string token)
+        public SlackAPI(string token=null)
         {
-            Token = token;
+            Token = (token != null)? token : string.Empty;
             Initiate();
         }
 
