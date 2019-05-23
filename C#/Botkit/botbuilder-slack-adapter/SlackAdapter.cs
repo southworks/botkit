@@ -236,27 +236,30 @@ namespace botbuilder_slack_adapter
         /// <param name="activity">The updated activity in the form `{id: <id of activity to update>, ...}`</param>
         public override async Task<ResourceResponse> UpdateActivityAsync(ITurnContext turnContext, Activity activity, CancellationToken cancellationToken)
         {
+            ResourceResponse results = null;
             if (activity.Id != null && activity.Conversation != null)
             {
                 try
                 {
                     dynamic message = ActivityToSlack(activity);
                     SlackAPI slack = await GetAPIAsync(activity);
-                    // results = await slack.chat.update(message);
+                    results = await slack.chat.update(message);
                     if (!results.ok)
                     {
-
+                        Console.WriteLine("Error updating activity on Slack:", results);
                     }
                 }
                 catch (Exception ex)
                 {
-                    throw ex;
+                    Console.WriteLine("Error updating activity on Slack:", ex.Message);
                 }
             }
             else
             {
                 throw new Exception("Cannot update activity: activity is missing id.");
             }
+
+            return results;
         }
 
         /// <summary>
