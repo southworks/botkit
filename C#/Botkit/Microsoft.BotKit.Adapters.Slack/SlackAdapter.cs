@@ -10,7 +10,6 @@ using System.Dynamic;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Net;
-using BotkitLibrary;
 
 namespace Microsoft.BotKit.Adapters.Slack
 {
@@ -144,7 +143,7 @@ namespace Microsoft.BotKit.Adapters.Slack
         public async Task<object> ValidateOauthCode(string code)
         {
             SlackAPI slack = new SlackAPI();
-            var results = await slack.oauth.access(); // TODO: Implement 'slack.oauth.access' in 'SlackApi'
+            /*var*/ dynamic results = string.Empty; //await slack.oauth.access(); // TODO: Implement 'slack.oauth.access' in 'SlackApi'
             if (results.ok)
             {
                 return results;
@@ -214,14 +213,18 @@ namespace Microsoft.BotKit.Adapters.Slack
 
                         if (message.ephemeral)
                         {
-                            result = await slack.Chat
+                            // result = await slack.Chat // TODO
                         }
                         else
                         {
 
                         }
 
-                        if (result.Ok)
+                        // if (result.Ok) // TODO
+                    }
+                    catch
+                    {
+
                     }
                 }
             }
@@ -243,8 +246,8 @@ namespace Microsoft.BotKit.Adapters.Slack
                 {
                     dynamic message = ActivityToSlack(activity);
                     SlackAPI slack = await GetAPIAsync(activity);
-                    results = await slack.chat.update(message);
-                    if (!results.ok)
+                    //results = await slack.chat.update(message);
+                    if (/*!results.ok*/ true)
                     {
                         Console.WriteLine("Error updating activity on Slack:", results);
                     }
