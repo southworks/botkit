@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace botbuilder_slack_adapter
+namespace Microsoft.BotKit.Adapters.Slack
 {
     public class SlackEventMiddleware : MiddlewareSet
     {

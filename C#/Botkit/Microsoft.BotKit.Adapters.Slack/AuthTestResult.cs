@@ -3,7 +3,7 @@
 
 using SlackAPI;
 
-namespace BotkitLibrary
+namespace Microsoft.BotKit.Adapters.Slack
 {
     /// <summary>
     /// Interface to cast result of web api calls

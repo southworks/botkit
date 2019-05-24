@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 using System.Net;
 using BotkitLibrary;
 
-namespace botbuilder_slack_adapter
+namespace Microsoft.BotKit.Adapters.Slack
 {
     public class SlackAdapter : BotAdapter
     {
