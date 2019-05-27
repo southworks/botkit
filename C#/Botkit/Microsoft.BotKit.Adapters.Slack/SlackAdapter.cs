@@ -115,7 +115,7 @@ namespace Microsoft.BotKit.Adapters.Slack
             else if ((activity.Conversation as dynamic).team != null)
             {
                 var userID = await options.GetBotUserByTeam((activity.Conversation as dynamic).team);
-                return string.IsNullOrEmpty(userID) ? userID : throw new Exception("Missing credentials for team.");
+                return !string.IsNullOrEmpty(userID) ? userID : throw new Exception("Missing credentials for team.");
             }
             else
             {
@@ -144,14 +144,7 @@ namespace Microsoft.BotKit.Adapters.Slack
         {
             SlackAPI slack = new SlackAPI();
             /*var*/ dynamic results = string.Empty; //await slack.oauth.access(); // TODO: Implement 'slack.oauth.access' in 'SlackApi'
-            if (results.ok)
-            {
-                return results;
-            }
-            else
-            {
-                throw new Exception(results.error);
-            }
+            return results.ok ? results : throw new Exception(results.error);
         }
 
         /// <summary>
@@ -352,7 +345,7 @@ namespace Microsoft.BotKit.Adapters.Slack
                         },
                         From = new ChannelAccount()
                         {
-                            Id = slackEvent.bot_id ? slackEvent.bot_id : slackEvent.user.id
+                            Id = (slackEvent.bot_id != null) ? slackEvent.bot_id : slackEvent.user.id
                         },
                         Recipient = new ChannelAccount()
                         {
