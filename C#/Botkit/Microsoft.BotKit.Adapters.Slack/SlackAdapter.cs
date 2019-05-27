@@ -6,6 +6,7 @@ using Microsoft.Bot.Schema;
 using Newtonsoft.Json;
 using SlackAPI;
 using System;
+using System.Collections.Generic;
 using System.Dynamic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,7 +20,9 @@ namespace Microsoft.BotKit.Adapters.Slack
         private readonly SlackAPI Slack;
         private readonly string Identity;
         private readonly string SlackOAuthURL = "https://slack.com/oauth/authorize?client_id=";
-        public Task<Action<SlackBotWorker, Task<object>>>[] Middlewares;
+        public Dictionary<string, Ware> Middlewares;
+        public readonly string NAME = "Slack Adapter";
+        public SlackBotWorker botkitWorker; 
 
         /// <summary>
         /// Create a Slack adapter.
@@ -59,20 +62,30 @@ namespace Microsoft.BotKit.Adapters.Slack
                 throw new Exception("Missing Slack API credentials! Provide clientId, clientSecret, scopes and redirectUri as part of the SlackAdapter options.");
             }
 
-            // TODO: migrate middleware
-            //this.middlewares = {
-            //    spawn: [
-            //        async (bot, next) => {
-            //            // make the Slack API available to all bot instances.
-            //            bot.api = await this.getAPI(bot.getConfig('activity')).catch((err) => {
-            //                debug('An error occurred while trying to get API creds for team', err);
-            //                return next(new Error('Could not spawn a Slack API instance'));
-            //            });
+            Ware ware = new Ware();
+            ware.Name = "spawn";
+            ware.Middlewares = new List<Action<object, Action>>();
+            ware.Middlewares.Add
+                (
+                    async (Bot, Next) =>
+                    {
+                        try
+                        {
+                            // make the Slack API available to all bot instances.
+                            (Bot as dynamic).api = await GetAPIAsync((Bot as dynamic).GetConfig("activity"));
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine("An error occurred while trying to get API creds for team", ex.Message);
+                            throw ex;
+                        }
 
-            //            next();
-            //        }
-            //    ]
-            //};
+                        Next();
+                    }
+                );
+
+            Middlewares = new Dictionary<string, Ware>();
+            Middlewares.Add(ware.Name, ware);
         }
 
         /// <summary>
