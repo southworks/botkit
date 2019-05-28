@@ -13,7 +13,7 @@ namespace Microsoft.BotKit.Adapters.Slack
     public class SlackAdapter : BotAdapter
     {
         private readonly ISlackAdapterOptions options;
-        private readonly SlackAPI Slack;
+        private readonly SlackTaskClient Slack;
         private readonly string Identity;
         public Task<Action<SlackBotWorker, Task<object>>>[] Middlewares;
 
@@ -77,7 +77,7 @@ namespace Microsoft.BotKit.Adapters.Slack
         /// </summary>
         /// <param name="activity"></param>
         /// <returns></returns>
-        public async Task<SlackAPI> GetAPI(Activity activity)
+        public async Task<SlackTaskClient> GetAPI(Activity activity)
         {
             return Slack;
             //if (Slack != null)
