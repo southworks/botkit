@@ -40,9 +40,9 @@ namespace Microsoft.BotKit
         /// </summary>
         /// <param name="key">The name of a value stored in the configuration</param>
         /// <returns>The value stored in the configuration (or null if absent)</returns>
-        public object GetConfig(string key)
+        public Activity GetConfig(string key)
         {
-            return new object();
+            return new Activity();
         }
 
         /// <summary>

@@ -64,7 +64,7 @@ namespace Microsoft.BotKit.Adapters.Slack
 
             Ware ware = new Ware();
             ware.Name = "spawn";
-            ware.Middlewares = new List<Action<object, Action>>();
+            ware.Middlewares = new List<Action<BotWorker, Action>>();
             ware.Middlewares.Add
                 (
                     async (Bot, Next) =>
@@ -72,7 +72,7 @@ namespace Microsoft.BotKit.Adapters.Slack
                         try
                         {
                             // make the Slack API available to all bot instances.
-                            (Bot as dynamic).api = await GetAPIAsync((Bot as dynamic).GetConfig("activity"));
+                            (Bot as dynamic).api = await GetAPIAsync(Bot.GetConfig("activity"));
                         }
                         catch (Exception ex)
                         {

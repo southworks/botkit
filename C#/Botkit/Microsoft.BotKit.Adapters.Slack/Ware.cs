@@ -13,6 +13,6 @@ namespace Microsoft.BotKit.Adapters.Slack
         /// Valid names: spawn, ingest, send, receive
         /// </summary>
         public string Name;
-        public List<Action<object, Action>> Middlewares;
+        public List<Action<BotWorker, Action>> Middlewares;
     }
 }
