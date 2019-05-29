@@ -14,13 +14,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Net;
 using System.Text;
+using SlackAPI;
 
 namespace Microsoft.BotKit.Adapters.Slack
 {
     public class SlackAdapter : BotAdapter
     {
         private readonly ISlackAdapterOptions options;
-        private readonly SlackAPI Slack;
+        private readonly SlackTaskClient Slack;
         private readonly string Identity;
         private readonly string SlackOAuthURL = "https://slack.com/oauth/authorize?client_id=";
         public Dictionary<string, Ware> Middlewares;
@@ -53,8 +54,8 @@ namespace Microsoft.BotKit.Adapters.Slack
 
             if (this.options.BotToken != null)
             {
-                Slack = new SlackAPI(this.options.BotToken);
-                Identity = Slack.GetIdentity();
+                Slack = new SlackTaskClient(this.options.BotToken);
+                Identity = Slack.MySelf?.id;
             }
             else if (
                 string.IsNullOrEmpty(options.ClientId) ||
@@ -97,7 +98,7 @@ namespace Microsoft.BotKit.Adapters.Slack
         /// </summary>
         /// <param name="activity"></param>
         /// <returns></returns>
-        public async Task<SlackAPI> GetAPIAsync(Activity activity)
+        public async Task<SlackTaskClient> GetAPIAsync(Activity activity)
         {
             if (Slack != null)
             {
@@ -106,7 +107,7 @@ namespace Microsoft.BotKit.Adapters.Slack
             else if ((activity.Conversation as dynamic).team != null)
             {
                 var token = await options.GetTokenForTeam((activity.Conversation as dynamic).team);
-                return string.IsNullOrEmpty(token)? new SlackAPI(token) : throw new Exception("Missing credentials for team.");
+                return string.IsNullOrEmpty(token)? new SlackTaskClient(token) : throw new Exception("Missing credentials for team.");
             }
             else
             {
@@ -158,8 +159,8 @@ namespace Microsoft.BotKit.Adapters.Slack
         /// <param name="code">The value found in `req.query.code` as part of Slack's response to the oauth flow.</param>
         public async Task<object> ValidateOauthCodeAsync(string code)
         {
-            SlackAPI slack = new SlackAPI();
-            /*var*/ dynamic results = string.Empty; //await slack.oauth.access(); // TODO: Implement 'slack.oauth.access' in 'SlackApi'
+            var helpers = new SlackClientHelpers();
+            var results = await helpers.GetAccessTokenAsync(options.ClientId, options.ClientSecret, options.RedirectUri, code);
             return results.ok ? results : throw new Exception(results.error);
         }
 
@@ -170,15 +171,12 @@ namespace Microsoft.BotKit.Adapters.Slack
         /// <returns>A Slack message object with {text, attachments, channel, thread ts} as well as any fields found in activity.channelData</returns>
         public object ActivityToSlack(Activity activity)
         {
-            var channelId = activity.Conversation.Id;
-            var threadTS = (activity.Conversation as dynamic).threadTS;
-
             dynamic message = new ExpandoObject();
             message.TS = activity.Id;
             message.Text = activity.Text;
             message.Attachments = activity.Attachments;
-            message.Channel = channelId;
-            message.ThreadTS = threadTS;
+            message.Channel = activity.Conversation.Id;
+            message.ThreadTS = (activity.Conversation as dynamic).threadTS;
 
             // if channelData is specified, overwrite any fields in message object
             if (activity.ChannelData != null)
@@ -192,9 +190,9 @@ namespace Microsoft.BotKit.Adapters.Slack
                 message.User = activity.Recipient.Id;
             }
 
-            if (message.icon_url || message.icon_emoji || message.username)
+            if (message.IconURL != null || message.IconEmoji != null || message.Username != null)
             {
-                message.as_user = false;
+                message.AsUser = false;
             }
 
             return message;
@@ -207,7 +205,7 @@ namespace Microsoft.BotKit.Adapters.Slack
         /// <param name="activities">An array of outgoing activities to be sent back to the messaging API.</param>
         public override async Task<ResourceResponse[]> SendActivitiesAsync(ITurnContext turnContext, Activity[] activities, CancellationToken cancellationToken)
         {
-            ResourceResponse[] responses = { };
+            ResourceResponse[] responses = new ResourceResponse[0];
             for (var i = 0; i < activities.Length; i++)
             {
                 Activity activity = activities[i];
@@ -217,24 +215,38 @@ namespace Microsoft.BotKit.Adapters.Slack
 
                     try
                     {
-                        SlackAPI slack = await this.GetAPIAsync(turnContext.Activity);
-                        ChatPostMessageResult result = null;
+                        SlackTaskClient slack = await this.GetAPIAsync(turnContext.Activity);
+                        ChatPostMessageResult result = new ChatPostMessageResult();
 
                         if (message.ephemeral)
                         {
-                            // result = await slack.Chat // TODO
+                            Console.WriteLine("Post Ephemeral:", message);
+                            result = await slack.PostEphemeralMessageAsync(message.Channel, message.Text, message.User);
                         }
                         else
                         {
-
+                            Console.WriteLine("Post Message:", message);
+                            result = await slack.PostMessageAsync(message.Channel, message.Text);
                         }
 
-                        // if (result.Ok) // TODO
+                        if ((result as dynamic).Ok)
+                        {
+                            var response = new { id = result.Id, activityId = result.Ts, conversation = new { Id = result.Channel } };
+                            responses.SetValue(response, responses.Length - 1);
+                        }
+                        else
+                        {
+                            Console.WriteLine("Error sending activity to API:", result);
+                        }
                     }
-                    catch
+                    catch (Exception ex)
                     {
-
+                        Console.WriteLine("Error sending activity to API:", ex.Message);
                     }
+                }
+                else
+                {
+                    Console.WriteLine("Unknown message type encountered in sendActivities: ", activity.Type);
                 }
             }
 
@@ -254,7 +266,7 @@ namespace Microsoft.BotKit.Adapters.Slack
                 try
                 {
                     dynamic message = ActivityToSlack(activity);
-                    SlackAPI slack = await GetAPIAsync(activity);
+                    SlackTaskClient slack = await GetAPIAsync(activity);
                     //results = await slack.chat.update(message);
                     if (/*!results.ok*/ true)
                     {
@@ -285,8 +297,8 @@ namespace Microsoft.BotKit.Adapters.Slack
             {
                 try
                 {
-                    SlackAPI slack = await GetAPIAsync(turnContext.Activity);
-                    // results = await slack.chat.delete({ ts: reference.activityId, channel: reference.conversation.id });
+                    SlackTaskClient slack = await GetAPIAsync(turnContext.Activity);
+                    var results = await slack.DeleteMessageAsync(reference.ChannelId, turnContext.Activity.Timestamp.Value.DateTime);
                 }
                 catch (Exception ex)
                 {
@@ -556,8 +568,10 @@ namespace Microsoft.BotKit.Adapters.Slack
 
                 string baseString = String.Join(":", signature);
 
-                HashAlgorithm algorithm = SHA256.Create();
-                var hash = "v0=" + algorithm.ComputeHash(Encoding.UTF8.GetBytes(options.ClientSigningSecret));
+                HMACSHA256 myHMAC = new HMACSHA256(Encoding.UTF8.GetBytes(options.ClientSigningSecret));
+
+                var hash = "v0=" + myHMAC.ComputeHash(Encoding.UTF8.GetBytes(baseString));
+
                 var retrievedSignature = request.Headers.GetValues("X-Slack-Signature");
 
                 // Compare the hash of the computed signature with the retrieved signature with a secure hmac compare function
