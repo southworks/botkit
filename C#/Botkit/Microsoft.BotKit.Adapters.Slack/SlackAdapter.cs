@@ -205,13 +205,13 @@ namespace Microsoft.BotKit.Adapters.Slack
         /// <param name="activities">An array of outgoing activities to be sent back to the messaging API.</param>
         public override async Task<ResourceResponse[]> SendActivitiesAsync(ITurnContext turnContext, Activity[] activities, CancellationToken cancellationToken)
         {
-            ResourceResponse[] responses = new ResourceResponse[0];
+            List<ResourceResponse> responses = new List<ResourceResponse>();
             for (var i = 0; i < activities.Length; i++)
             {
                 Activity activity = activities[i];
                 if (activity.Type == ActivityTypes.Message)
                 {
-                    dynamic message = ActivityToSlack(activity as Activity);
+                    dynamic message = ActivityToSlack(activity);
 
                     try
                     {
@@ -229,28 +229,32 @@ namespace Microsoft.BotKit.Adapters.Slack
                             result = await slack.PostMessageAsync(message.Channel, message.Text);
                         }
 
-                        if ((result as dynamic).Ok)
+                        if (result.ok)
                         {
-                            var response = new { id = result.Id, activityId = result.Ts, conversation = new { Id = result.Channel } };
-                            responses.SetValue(response, responses.Length - 1);
+                            ResourceResponse response = new ResourceResponse() //{ id = result.Id, activityId = result.Ts, conversation = new { Id = result.Channel } };
+                            {
+                                Id = result.Id
+                            };
+                            responses.Add(response as ResourceResponse);
                         }
                         else
                         {
-                            Console.WriteLine("Error sending activity to API:", result);
+                            throw new Exception("Error sending activity to API:${result}");
                         }
                     }
                     catch (Exception ex)
                     {
                         Console.WriteLine("Error sending activity to API:", ex.Message);
+                        throw ex;
                     }
                 }
                 else
                 {
-                    Console.WriteLine("Unknown message type encountered in sendActivities: ", activity.Type);
+                    throw new Exception("Unknown message type encountered in sendActivities:${activity.Type}");
                 }
             }
 
-            return responses;
+            return responses.ToArray();
         }
 
         /// <summary>
@@ -260,15 +264,15 @@ namespace Microsoft.BotKit.Adapters.Slack
         /// <param name="activity">The updated activity in the form `{id: <id of activity to update>, ...}`</param>
         public override async Task<ResourceResponse> UpdateActivityAsync(ITurnContext turnContext, Activity activity, CancellationToken cancellationToken)
         {
-            ResourceResponse results = null;
+            dynamic results = null;
             if (activity.Id != null && activity.Conversation != null)
             {
                 try
                 {
                     dynamic message = ActivityToSlack(activity);
                     SlackTaskClient slack = await GetAPIAsync(activity);
-                    //results = await slack.chat.update(message);
-                    if (/*!results.ok*/ true)
+                    results = await slack.UpdateAsync(activity.Timestamp.ToString(), activity.ChannelId, message);
+                    if (!results.ok)
                     {
                         Console.WriteLine("Error updating activity on Slack:", results);
                     }
@@ -283,7 +287,7 @@ namespace Microsoft.BotKit.Adapters.Slack
                 throw new Exception("Cannot update activity: activity is missing id.");
             }
 
-            return results;
+            return results as ResourceResponse;
         }
 
         /// <summary>
@@ -317,13 +321,13 @@ namespace Microsoft.BotKit.Adapters.Slack
         /// </summary>
         /// <param name="reference">A conversation reference to be applied to future messages.</param>
         /// <param name="logic">A bot logic function that will perform continuing action in the form `async(context) => { ... }`</param>
-        public async Task<Task> ContinueConversationAsync(ConversationReference reference, BotCallbackHandler logic)
+        public async Task ContinueConversationAsync(ConversationReference reference, BotCallbackHandler logic)
         {
             var request = reference.GetContinuationActivity().ApplyConversationReference(reference, true); // TODO: check on this
             
             TurnContext context = new TurnContext(this, request);
 
-            return RunPipelineAsync(context, logic, default(CancellationToken));
+            await RunPipelineAsync(context, logic, default(CancellationToken));
         }
 
         /// <summary>
@@ -564,7 +568,7 @@ namespace Microsoft.BotKit.Adapters.Slack
                 var timestamp = request.Headers;
                 var body = request.Content;
 
-                object[] signature = { "v0", timestamp, body };
+                object[] signature = { "v0", timestamp.ToString(), body.ToString() };
 
                 string baseString = String.Join(":", signature);
 
