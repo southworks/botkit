@@ -362,7 +362,7 @@ namespace Microsoft.BotKit.Adapters.Slack
                 return;
             }
 
-            if (!VerifySignatureAsync(request, response))
+            if (!VerifySignature(request, response))
             {
             }
             else if (slackEvent.payload != null)
@@ -468,7 +468,7 @@ namespace Microsoft.BotKit.Adapters.Slack
                     (activity.Conversation as dynamic).team = (activity.ChannelData as dynamic).team;
 
                     // If this is conclusively a message originating from a user, we'll mark it as such
-                    if (slackEvent.Event.Type == "message" && slackEvent.Event.Subtype != null)
+                    if (slackEvent.Event.Type == "message" && slackEvent.Event.Subtype == null)
                     {
                         activity.Type = ActivityTypes.Message;
                         activity.Text = slackEvent.Event.Text;
@@ -561,7 +561,7 @@ namespace Microsoft.BotKit.Adapters.Slack
             }
         }
         
-        private bool VerifySignatureAsync(HttpRequestMessage request, HttpResponseMessage response)
+        private bool VerifySignature(HttpRequestMessage request, HttpResponseMessage response)
         {
             if (options.ClientSigningSecret != null && request.Content != null)
             {
