@@ -10,7 +10,7 @@ namespace Microsoft.BotKit.Core
     {
         public string WebhookUri { get; set; }
         public string DialogStateProperty { get; set; }
-        public BotkitFrameworkAdapter Adapter { get; set; } // TO-DO: compare with TS implementation
+        public BotkitBotFrameworkAdapter Adapter { get; set; } // TO-DO: compare with TS implementation
         public Tuple<AdapterKey, string> AdapterConfig { get; set; }
         public IWebserver Webserver { get; set; }
         public IStorage Storage { get; set; }
