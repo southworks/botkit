@@ -79,8 +79,7 @@ namespace Microsoft.BotKit.Adapters.Slack
                         }
                         catch (Exception ex)
                         {
-                            Console.WriteLine("An error occurred while trying to get API creds for team", ex.Message);
-                            throw ex;
+                            throw new Exception("An error occurred while trying to get API creds for team ${ex.Message}");
                         }
 
                         Next();
@@ -108,11 +107,8 @@ namespace Microsoft.BotKit.Adapters.Slack
                 var token = await options.GetTokenForTeam((activity.Conversation as dynamic).team);
                 return string.IsNullOrEmpty(token)? new SlackAPI(token) : throw new Exception("Missing credentials for team.");
             }
-            else
-            {
-                Console.WriteLine("Unable to create API based on activity: ", activity);
-                return null;
-            }
+            
+            throw new Exception("Unable to create API based on activity:${activity}");
         }
 
         /// <summary>
@@ -133,11 +129,8 @@ namespace Microsoft.BotKit.Adapters.Slack
                 var userID = await options.GetBotUserByTeam((activity.Conversation as dynamic).team);
                 return !string.IsNullOrEmpty(userID) ? userID : throw new Exception("Missing credentials for team.");
             }
-            else
-            {
-                Console.WriteLine("Could not find bot user id based on activity: ", activity);
-                return null;
-            }
+
+            throw new Exception("Could not find bot user id based on activity:${activity}");
         }
 
         /// <summary>
@@ -224,16 +217,12 @@ namespace Microsoft.BotKit.Adapters.Slack
                         {
                             // result = await slack.Chat // TODO
                         }
-                        else
-                        {
-
-                        }
 
                         // if (result.Ok) // TODO
                     }
-                    catch
+                    catch (Exception ex)
                     {
-
+                        throw ex;
                     }
                 }
             }
@@ -263,7 +252,7 @@ namespace Microsoft.BotKit.Adapters.Slack
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Error updating activity on Slack:", ex.Message);
+                    throw ex;
                 }
             }
             else
@@ -290,8 +279,7 @@ namespace Microsoft.BotKit.Adapters.Slack
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Error deleting activity", ex.Message);
-                    throw ex;
+                    throw new Exception("Error deleting activity ${ex.Message}");
                 }
             }
             else
@@ -541,7 +529,7 @@ namespace Microsoft.BotKit.Adapters.Slack
             }
             else
             {
-                Console.WriteLine("Unknown Slack event type: ", slackEvent);
+                throw new Exception("Unknown Slack event type:${slackEvent}");
             }
         }
         
