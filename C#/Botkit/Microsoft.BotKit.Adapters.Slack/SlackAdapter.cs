@@ -79,7 +79,7 @@ namespace Microsoft.BotKit.Adapters.Slack
                         }
                         catch (Exception ex)
                         {
-                            throw new Exception("An error occurred while trying to get API creds for team ${ex.Message}");
+                            throw new Exception($"An error occurred while trying to get API creds for team {ex.Message}");
                         }
 
                         Next();
@@ -105,10 +105,10 @@ namespace Microsoft.BotKit.Adapters.Slack
             else if ((activity.Conversation as dynamic).team != null)
             {
                 var token = await options.GetTokenForTeam((activity.Conversation as dynamic).team);
-                return string.IsNullOrEmpty(token)? new SlackAPI(token) : throw new Exception("Missing credentials for team.");
+                return !string.IsNullOrEmpty(token)? new SlackAPI(token) : throw new Exception("Missing credentials for team.");
             }
             
-            throw new Exception("Unable to create API based on activity:${activity}");
+            throw new Exception($"Unable to create API based on activity:{activity}");
         }
 
         /// <summary>
@@ -130,7 +130,7 @@ namespace Microsoft.BotKit.Adapters.Slack
                 return !string.IsNullOrEmpty(userID) ? userID : throw new Exception("Missing credentials for team.");
             }
 
-            throw new Exception("Could not find bot user id based on activity:${activity}");
+            throw new Exception($"Could not find bot user id based on activity:{activity}");
         }
 
         /// <summary>
@@ -279,7 +279,7 @@ namespace Microsoft.BotKit.Adapters.Slack
                 }
                 catch (Exception ex)
                 {
-                    throw new Exception("Error deleting activity ${ex.Message}");
+                    throw new Exception($"Error deleting activity {ex.Message}");
                 }
             }
             else
@@ -529,7 +529,7 @@ namespace Microsoft.BotKit.Adapters.Slack
             }
             else
             {
-                throw new Exception("Unknown Slack event type:${slackEvent}");
+                throw new Exception($"Unknown Slack event type:{slackEvent}");
             }
         }
         
