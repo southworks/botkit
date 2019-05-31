@@ -14,6 +14,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Net;
 using System.Text;
+using SlackAPI;
 
 namespace Microsoft.BotKit.Adapters.Slack
 {
@@ -53,8 +54,8 @@ namespace Microsoft.BotKit.Adapters.Slack
 
             if (this.options.BotToken != null)
             {
-                Slack = new SlackAPI(this.options.BotToken);
-                Identity = Slack.GetIdentity();
+                Slack = new SlackTaskClient(this.options.BotToken);
+                Identity = Slack.MySelf?.id;
             }
             else if (
                 string.IsNullOrEmpty(options.ClientId) ||
@@ -75,7 +76,7 @@ namespace Microsoft.BotKit.Adapters.Slack
                         try
                         {
                             // make the Slack API available to all bot instances.
-                            (Bot as dynamic).api = await GetAPIAsync(Bot.GetConfig("activity"));
+                            (Bot as dynamic).api = await GetAPIAsync(Bot.GetActivity());
                         }
                         catch (Exception ex)
                         {
@@ -96,7 +97,7 @@ namespace Microsoft.BotKit.Adapters.Slack
         /// </summary>
         /// <param name="activity"></param>
         /// <returns></returns>
-        public async Task<SlackTaskClient> GetAPI(Activity activity)
+        public async Task<SlackTaskClient> GetAPIAsync(Activity activity)
         {
             if (Slack != null)
             {
@@ -105,7 +106,7 @@ namespace Microsoft.BotKit.Adapters.Slack
             else if ((activity.Conversation as dynamic).team != null)
             {
                 var token = await options.GetTokenForTeam((activity.Conversation as dynamic).team);
-                return !string.IsNullOrEmpty(token)? new SlackAPI(token) : throw new Exception("Missing credentials for team.");
+                return !string.IsNullOrEmpty(token)? new SlackTaskClient(token) : throw new Exception("Missing credentials for team.");
             }
             
             throw new Exception($"Unable to create API based on activity:{activity}");
@@ -151,7 +152,6 @@ namespace Microsoft.BotKit.Adapters.Slack
         /// <param name="code">The value found in `req.query.code` as part of Slack's response to the oauth flow.</param>
         public async Task<object> ValidateOauthCodeAsync(string code)
         {
-            SlackAPI slack = new SlackAPI();
             /*var*/ dynamic results = string.Empty; //await slack.oauth.access(); // TODO: Implement 'slack.oauth.access' in 'SlackApi'
             return results.ok ? results : throw new Exception(results.error);
         }
@@ -210,7 +210,7 @@ namespace Microsoft.BotKit.Adapters.Slack
 
                     try
                     {
-                        SlackAPI slack = await this.GetAPIAsync(turnContext.Activity);
+                        SlackTaskClient slack = await this.GetAPIAsync(turnContext.Activity);
                         ChatPostMessageResult result = null;
 
                         if (message.ephemeral)
@@ -243,7 +243,7 @@ namespace Microsoft.BotKit.Adapters.Slack
                 try
                 {
                     dynamic message = ActivityToSlack(activity);
-                    SlackAPI slack = await GetAPIAsync(activity);
+                    SlackTaskClient slack = await GetAPIAsync(activity);
                     //results = await slack.chat.update(message);
                     if (/*!results.ok*/ true)
                     {
@@ -274,7 +274,7 @@ namespace Microsoft.BotKit.Adapters.Slack
             {
                 try
                 {
-                    SlackAPI slack = await GetAPIAsync(turnContext.Activity);
+                    SlackTaskClient slack = await GetAPIAsync(turnContext.Activity);
                     // results = await slack.chat.delete({ ts: reference.activityId, channel: reference.conversation.id });
                 }
                 catch (Exception ex)
