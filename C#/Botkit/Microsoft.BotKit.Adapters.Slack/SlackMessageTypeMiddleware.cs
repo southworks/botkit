@@ -35,7 +35,7 @@ namespace Microsoft.BotKit.Adapters.Slack
             {
                 var adapter = context.Adapter as SlackAdapter;
 
-                string botUserId = await adapter.GetBotUserByTeam(context.Activity);
+                string botUserId = await adapter.GetBotUserByTeamAsync(context.Activity);
                 var mentionSyntax = "<@" + botUserId + "(\\|.*?)?>";
                 var mention = new Regex(mentionSyntax, RegexOptions.IgnoreCase);
                 var directMention = new Regex('^' + mentionSyntax, RegexOptions.IgnoreCase);
