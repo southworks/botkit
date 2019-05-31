@@ -20,7 +20,7 @@ namespace Microsoft.BotKit.Adapters.Slack
     public class SlackAdapter : BotAdapter
     {
         private readonly ISlackAdapterOptions options;
-        private readonly SlackAPI Slack;
+        private readonly SlackTaskClient Slack;
         private readonly string Identity;
         private readonly string SlackOAuthURL = "https://slack.com/oauth/authorize?client_id=";
         public Dictionary<string, Ware> Middlewares;
@@ -96,7 +96,7 @@ namespace Microsoft.BotKit.Adapters.Slack
         /// </summary>
         /// <param name="activity"></param>
         /// <returns></returns>
-        public async Task<SlackAPI> GetAPIAsync(Activity activity)
+        public async Task<SlackTaskClient> GetAPI(Activity activity)
         {
             if (Slack != null)
             {
