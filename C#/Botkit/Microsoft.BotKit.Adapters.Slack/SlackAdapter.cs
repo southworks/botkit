@@ -76,7 +76,7 @@ namespace Microsoft.BotKit.Adapters.Slack
                         try
                         {
                             // make the Slack API available to all bot instances.
-                            (Bot as dynamic).api = await GetAPIAsync(Bot.GetConfig("activity"));
+                            (Bot as dynamic).api = await GetAPIAsync(Bot.GetActivity());
                         }
                         catch (Exception ex)
                         {
