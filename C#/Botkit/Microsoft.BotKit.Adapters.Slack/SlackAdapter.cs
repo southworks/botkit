@@ -317,7 +317,7 @@ namespace Microsoft.BotKit.Adapters.Slack
         /// <param name="request">A request object from Restify or Express</param>
         /// <param name="response">A response object from Restify or Express</param>
         /// <param name="logic">A bot logic function in the form `async(context) => { ... }`</param>
-        public async void ProcessActivityAsync(HttpRequest request, HttpResponse response, BotCallbackHandler logic)
+        public async Task ProcessActivityAsync(HttpRequest request, HttpResponse response, BotCallbackHandler logic)
         {
             // Create an Activity based on the incoming message from Slack.
             // There are a few different types of event that Slack might send.
