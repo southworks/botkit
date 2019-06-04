@@ -122,7 +122,7 @@ namespace Microsoft.BotKit.Adapters.Slack
         /// </summary>
         /// <param name="source">An incoming message object</param>
         /// <param name="resp">An outgoing message object (or part of one or just reply text)</param>
-        public async Task<object> ReplyInThread(IBotkitMessage source, IBotkitMessage resp)
+        public async Task<object> ReplyInThread(BotkitSlackMessage source, BotkitSlackMessage resp)
         {
             // make sure the  threadTs setting is set
             // this will be included in the conversation reference
@@ -141,7 +141,7 @@ namespace Microsoft.BotKit.Adapters.Slack
         /// </summary>
         /// <param name="source">An incoming message object</param>
         /// <param name="resp">An outgoing message object (or part of one or just reply text)</param>
-        public async Task<object> ReplyEphemeral(IBotkitMessage source, IBotkitMessage resp)
+        public async Task<object> ReplyEphemeral(BotkitSlackMessage source, BotkitSlackMessage resp)
         {
             // make sure resp is in an object format.
             var activity = EnsureMessageFormat(resp);
@@ -161,7 +161,7 @@ namespace Microsoft.BotKit.Adapters.Slack
         /// </summary>
         /// <param name="source">An incoming message object of type `slash_command`</param>
         /// <param name="resp">An outgoing message object (or part of one or just reply text)</param>
-        public async Task<object> ReplyPublic(IBotkitMessage source, IBotkitMessage resp)
+        public async Task<object> ReplyPublic(BotkitSlackMessage source, BotkitSlackMessage resp)
         {
             var activity = EnsureMessageFormat(resp);
 
@@ -178,7 +178,7 @@ namespace Microsoft.BotKit.Adapters.Slack
         /// </summary>
         /// <param name="source">An incoming message object of type `slash_command`</param>
         /// <param name="resp">An outgoing message object (or part of one or just reply text)</param>
-        public async Task<object> ReplyPrivate(IBotkitMessage source, IBotkitMessage resp)
+        public async Task<object> ReplyPrivate(BotkitSlackMessage source, BotkitSlackMessage resp)
         {
             var activity = EnsureMessageFormat(resp);
 
@@ -196,7 +196,7 @@ namespace Microsoft.BotKit.Adapters.Slack
         /// </summary>
         /// <param name="source">An incoming message object of type `interactive_message`</param>
         /// <param name="resp">A new or modified message that will replace the original one</param>
-        public async Task<object> ReplyInteractive(IBotkitMessage source, IBotkitMessage resp)
+        public async Task<object> ReplyInteractive(BotkitSlackMessage source, BotkitSlackMessage resp)
         {
             if((source.IncomingMessage.ChannelData as dynamic).ResponseUrl is null) //TO-DO: replace 'as dynamic'
             {
