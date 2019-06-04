@@ -37,7 +37,7 @@ namespace Microsoft.BotKit.Core
         /// <summary>
         /// Any BotBuilder-compatible adapter - defaults to a BotFrameworkAdapter
         /// </summary>
-        public object Adapter { get; set; }
+        public BotAdapter Adapter { get; set; }
 
         /// <summary>
         /// A BotBuilder DialogSet that serves as the top level dialog container for the Botkit app
@@ -174,7 +174,7 @@ namespace Microsoft.BotKit.Core
         /// Note: this is normally called internally and is only required when state changes happen outside of the normal processing flow.
         /// </summary>
         /// <param name="bot"></param>
-        public async void SaveState(BotWorker bot)
+        public async Task SaveState(BotWorker bot)
         {
 
         }
