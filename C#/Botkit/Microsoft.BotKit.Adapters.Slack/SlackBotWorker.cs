@@ -67,7 +67,7 @@ namespace Microsoft.BotKit.Adapters.Slack
                 convRef.User.Name = null;
                 convRef.ChannelId = "slack";
 
-                return ChangeContext(convRef);
+                return ChangeContextAsync(convRef);
             }
             else
             {
@@ -92,7 +92,7 @@ namespace Microsoft.BotKit.Adapters.Slack
             convRef.User.Name = null;
             convRef.ChannelId = "slack";
 
-            return await ChangeContext(convRef);
+            return await ChangeContextAsync(convRef);
         }
 
         /// <summary>
@@ -114,7 +114,7 @@ namespace Microsoft.BotKit.Adapters.Slack
             convRef.User.Name = null;
             convRef.ChannelId = "slack";
 
-            return await ChangeContext(convRef);
+            return await ChangeContextAsync(convRef);
         }
 
         /// <summary>
@@ -132,7 +132,7 @@ namespace Microsoft.BotKit.Adapters.Slack
                 threadTs = (source.IncomingMessage.ChannelData as dynamic).Ts; //TO-DO: replace 'as dynamic'
             }
 
-            return await Reply(source, resp);
+            return await ReplyAsync(source, resp);
         }
 
         /// <summary>
@@ -152,7 +152,7 @@ namespace Microsoft.BotKit.Adapters.Slack
 
             resp.IncomingMessage = activity;
 
-            return await Reply(source, resp);
+            return await ReplyAsync(source, resp);
         }
 
         /// <summary>
