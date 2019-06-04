@@ -19,7 +19,7 @@ namespace Microsoft.BotKit
     /// </summary>
     public class BotWorker
     {
-        private BotWorkerConfiguration config;
+        public BotWorkerConfiguration config;
 
         public Botkit Controller { get; }
 
@@ -32,11 +32,6 @@ namespace Microsoft.BotKit
         {
             Controller = controller;
             this.config = config;
-        }
-
-        public Activity GetActivity()
-        {
-            return config.Activity;
         }
 
         /// Send a message using whatever context the bot was spawned in or set using changeContext() --
