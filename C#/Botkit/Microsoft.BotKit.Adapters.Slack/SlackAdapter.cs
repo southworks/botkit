@@ -1,6 +1,7 @@
 // Copyright(c) Microsoft Corporation.All rights reserved.
 // Licensed under the MIT License.
 
+using Microsoft.AspNetCore.Http;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Schema;
 using Newtonsoft.Json;
@@ -15,6 +16,7 @@ using System.Threading.Tasks;
 using System.Net;
 using System.Text;
 using SlackAPI;
+using System.IO;
 
 namespace Microsoft.BotKit.Adapters.Slack
 {
@@ -315,11 +317,11 @@ namespace Microsoft.BotKit.Adapters.Slack
         /// <param name="request">A request object from Restify or Express</param>
         /// <param name="response">A response object from Restify or Express</param>
         /// <param name="logic">A bot logic function in the form `async(context) => { ... }`</param>
-        public async void ProcessActivityAsync(HttpRequestMessage request, HttpResponseMessage response, BotCallbackHandler logic)
+        public async void ProcessActivityAsync(HttpRequest request, HttpResponse response, BotCallbackHandler logic)
         {
             // Create an Activity based on the incoming message from Slack.
             // There are a few different types of event that Slack might send.
-            dynamic slackEvent = request.Content;
+            dynamic slackEvent = request.Body;
 
             MediaTypeFormatter[] formatters = new MediaTypeFormatter[]
             {
@@ -335,9 +337,9 @@ namespace Microsoft.BotKit.Adapters.Slack
 
             if (slackEvent.type == "url_verification")
             {
-                response.StatusCode = HttpStatusCode.OK;
-                response.RequestMessage = request;
-                response.Content = new ObjectContent((slackEvent.challenge as object).GetType(), slackEvent.challenge, formatters[0]);
+                response.StatusCode = 200;
+                byte[] byteArray = Encoding.ASCII.GetBytes(new ObjectContent((slackEvent.challenge as object).GetType(), slackEvent.challenge, formatters[0]).Value.ToString());
+                response.Body = new MemoryStream(byteArray);
                 return;
             }
 
@@ -349,8 +351,7 @@ namespace Microsoft.BotKit.Adapters.Slack
                     slackEvent = JsonConvert.ToString(slackEvent.payload);
                     if (options.VerificationToken != null && slackEvent.token != options.VerificationToken)
                     {
-                        response.RequestMessage = request;
-                        response.StatusCode = HttpStatusCode.Forbidden;
+                        response.StatusCode = 403;
                     }
                     else
                     {
@@ -388,13 +389,13 @@ namespace Microsoft.BotKit.Adapters.Slack
                         await RunPipelineAsync(context, logic, default(CancellationToken));
 
                         // send http response back
-                        response.RequestMessage = request;
-                        response.StatusCode = (HttpStatusCode)Convert.ToInt32(context.TurnState.Get<string>("httpStatus"));
+                        response.StatusCode = Convert.ToInt32(context.TurnState.Get<string>("httpStatus"));
                         if (context.TurnState.Get<object>("httpBody") != null)
                         {
-                            response.Content = new ObjectContent(context.TurnState.Get<string>("httpBody").GetType(),
-                                                                 context.TurnState.Get<string>("httpBody"),
-                                                                 formatters[0]);
+                            byte[] byteArray = Encoding.ASCII.GetBytes(new ObjectContent(context.TurnState.Get<string>("httpBody").GetType(),
+                                                                       context.TurnState.Get<string>("httpBody"),
+                                                                       formatters[0]).Value.ToString());
+                            response.Body = new MemoryStream(byteArray);
                         }
                     }
                 }
@@ -403,9 +404,9 @@ namespace Microsoft.BotKit.Adapters.Slack
                     // this is an event api post
                     if (options.VerificationToken != null && slackEvent.Token != options.VerificationToken)
                     {
-                        response.RequestMessage = request;
-                        response.StatusCode = HttpStatusCode.Forbidden;
-                        response.Content = new ObjectContent(typeof(string), string.Empty, formatters[0]);
+                        response.StatusCode = 403;
+                        byte[] byteArray = Encoding.ASCII.GetBytes(new ObjectContent(typeof(string), string.Empty, formatters[0]).Value.ToString());
+                        response.Body = new MemoryStream(byteArray);
                     }
                     else
                     {
@@ -458,12 +459,12 @@ namespace Microsoft.BotKit.Adapters.Slack
                         await RunPipelineAsync(context, logic, default(CancellationToken));
 
                         // send http response back
-                        response.RequestMessage = request;
-                        response.StatusCode = (HttpStatusCode)Convert.ToInt32(context.TurnState.Get<string>("httpStatus"));
+                        response.StatusCode = Convert.ToInt32(context.TurnState.Get<string>("httpStatus"));
                         if (context.TurnState.Get<object>("httpBody") != null)
                         {
                             var messageBody = context.TurnState.Get<object>("httpBody");
-                            response.Content = new ObjectContent(messageBody.GetType(), messageBody, formatters[0]);
+                            byte[] byteArray = Encoding.ASCII.GetBytes(new ObjectContent(messageBody.GetType(), messageBody, formatters[0]).Value.ToString());
+                            response.Body = new MemoryStream(byteArray);
                         }
                     }
                 }
@@ -471,8 +472,7 @@ namespace Microsoft.BotKit.Adapters.Slack
                 {
                     if (options.VerificationToken != null && slackEvent.Token != options.VerificationToken)
                     {
-                        response.RequestMessage = request;
-                        response.StatusCode = HttpStatusCode.Forbidden;
+                        response.StatusCode = 403;
                     }
                     else
                     {
@@ -517,16 +517,17 @@ namespace Microsoft.BotKit.Adapters.Slack
                         await RunPipelineAsync(context, logic, default(CancellationToken));
 
                         // send http response back
-                        response.RequestMessage = request;
-                        response.StatusCode = (HttpStatusCode)Convert.ToInt32(context.TurnState.Get<string>("httpStatus"));
+                        response.StatusCode = Convert.ToInt32(context.TurnState.Get<string>("httpStatus"));
                         if (context.TurnState.Get<object>("httpBody") != null)
                         {
                             var messageBody = context.TurnState.Get<object>("httpBody");
-                            response.Content = new ObjectContent(messageBody.GetType(), messageBody, formatters[0]);
+                            byte[] byteArray = Encoding.ASCII.GetBytes(new ObjectContent(messageBody.GetType(), messageBody, formatters[0]).Value.ToString());
+                            response.Body = new MemoryStream(byteArray);
                         }
                         else
                         {
-                            response.Content = new ObjectContent(typeof(string), string.Empty, formatters[0]);
+                            byte[] byteArray = Encoding.ASCII.GetBytes(new ObjectContent(typeof(string), string.Empty, formatters[0]).Value.ToString());
+                            response.Body = new MemoryStream(byteArray);
                         }
                     }
                 }
@@ -537,12 +538,12 @@ namespace Microsoft.BotKit.Adapters.Slack
         /// Verify the signature of an incoming webhook request as originating from Slack.
         /// </summary>
         /// <returns>If signature is valid, returns true. Otherwise, sends a 401 error status via http response and then returns false.</returns>
-        private bool VerifySignature(HttpRequestMessage request, HttpResponseMessage response)
+        private bool VerifySignature(HttpRequest request, HttpResponse response)
         {
-            if (options.ClientSigningSecret != null && request.Content != null)
+            if (options.ClientSigningSecret != null && request.Body != null)
             {
                 var timestamp = request.Headers;
-                var body = request.Content;
+                var body = request.Body;
 
                 object[] signature = { "v0", timestamp.ToString(), body.ToString() };
 
@@ -552,7 +553,7 @@ namespace Microsoft.BotKit.Adapters.Slack
 
                 var hash = "v0=" + myHMAC.ComputeHash(Encoding.UTF8.GetBytes(baseString));
 
-                var retrievedSignature = request.Headers.GetValues("X-Slack-Signature");
+                var retrievedSignature = request.Headers["X-Slack-Signature"];
 
                 // Compare the hash of the computed signature with the retrieved signature with a secure hmac compare function
                 bool signatureIsValid = String.Equals(hash, retrievedSignature);
@@ -560,7 +561,7 @@ namespace Microsoft.BotKit.Adapters.Slack
                 // replace direct compare with the hmac result
                 if (!signatureIsValid)
                 {
-                    response.StatusCode = HttpStatusCode.Unauthorized;
+                    response.StatusCode = 401;
                     return false;
                 }
             }
