@@ -214,9 +214,9 @@ namespace Microsoft.BotKit.Adapters.Slack
                 (activity.Conversation as dynamic).ThreadTs = (source.IncomingMessage.ChannelData as dynamic).ThreadTs; //TO-DO: replace 'as dynamic'
             }
 
-            var adapter = (SlackAdapter)GetController().Adapter;
+            var adapter = (SlackAdapter)Controller.Adapter;
 
-            activity = (Activity) adapter.ActivityToSlack(activity);
+            activity = (Activity)adapter.ActivityToSlack(activity);
 
             var requestOptions = new
             {
@@ -280,7 +280,7 @@ namespace Microsoft.BotKit.Adapters.Slack
         /// <param name="update">An object in the form `{id: <id of message to update>, conversation: { id: <channel> }, text: <new text>, card: <array of card objects>}`</param>
         public async Task<ResourceResponse> UpdateMessage(IBotkitMessage update)
         {
-            SlackAdapter adapter = (SlackAdapter)GetController().Adapter;
+            SlackAdapter adapter = (SlackAdapter)Controller.Adapter;
             TurnContext context = config.TurnContext;
             CancellationTokenSource source = new CancellationTokenSource();
             CancellationToken token = source.Token;
@@ -293,7 +293,7 @@ namespace Microsoft.BotKit.Adapters.Slack
         /// <param name="update">An object in the form of `{id: <id of message to delete>, conversation: { id: <channel of message> }}`</param>
         public async Task DeleteMessage(IBotkitMessage update)
         {
-            var adapter = (BotFrameworkAdapter)GetController().Adapter;
+            var adapter = (BotFrameworkAdapter)Controller.Adapter;
             var context = config.TurnContext;
             CancellationTokenSource source = new CancellationTokenSource();
             CancellationToken token = source.Token;
