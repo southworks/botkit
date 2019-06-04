@@ -29,22 +29,9 @@ namespace Microsoft.BotKit.Adapters.Slack
         /// </summary>
         /// <param name="botkit">The Botkit controller object responsible for spawning this bot worker</param>
         /// <param name="config">Normally, a DialogContext object.  Can also be the id of a team.</param>
-        public SlackBotWorker(Botkit botkit, object config) : base(botkit, config)
+        public SlackBotWorker(Botkit botkit, BotWorkerConfiguration config) : base(botkit, config)
         {
-            // allow a teamid to be passed in
-            if (config.GetType().ToString() == "string")
-            {
-                var teamId = config;
-                DialogContext context = null;
-
-                // an activity is required to spawn the bot via the api
-                (context.Context.Activity as dynamic).Team = teamId; //TO-DO: replace 'as dynamic'
-
-                // a reference is used to spawn an api instance inside the adapter...
-                (context.Context.Activity.RelatesTo.Conversation as dynamic).Team = teamId; //TO-DO: replace 'as dynamic'
-
-                config = context;
-            }
+            // TODO make overload to allow a teamid (string) to be passed in
         }
 
         /// <summary>
