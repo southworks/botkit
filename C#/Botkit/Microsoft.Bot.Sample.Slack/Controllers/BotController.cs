@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Integration.AspNet.Core;
+using Microsoft.BotKit.Adapters.Slack;
 
 namespace Microsoft.Bot.Sample.Slack.Controllers
 {
@@ -17,10 +18,11 @@ namespace Microsoft.Bot.Sample.Slack.Controllers
     [ApiController]
     public class BotController : ControllerBase
     {
-        private readonly IBotFrameworkHttpAdapter Adapter;
+        private readonly SlackAdapter Adapter;
         private readonly IBot Bot;
+        private BotCallbackHandler Callback;
 
-        public BotController(IBotFrameworkHttpAdapter adapter, IBot bot)
+        public BotController(SlackAdapter adapter, IBot bot)
         {
             Adapter = adapter;
             Bot = bot;
@@ -31,7 +33,7 @@ namespace Microsoft.Bot.Sample.Slack.Controllers
         {
             // Delegate the processing of the HTTP POST to the adapter.
             // The adapter will invoke the bot.
-            await Adapter.ProcessAsync(Request, Response, Bot);
+            await Adapter.ProcessActivityAsync(Request, Response, Callback);
         }
     }
 }
