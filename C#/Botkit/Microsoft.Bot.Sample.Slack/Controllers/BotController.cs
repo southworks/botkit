@@ -20,20 +20,22 @@ namespace Microsoft.Bot.Sample.Slack.Controllers
     {
         private readonly SlackAdapter Adapter;
         private readonly IBot Bot;
-        private BotCallbackHandler Callback;
 
         public BotController(SlackAdapter adapter, IBot bot)
         {
             Adapter = adapter;
             Bot = bot;
+
+            Adapter.Use(new SlackEventMiddleware());
         }
 
+        
         [HttpPost]
         public async Task PostAsync()
         {
             // Delegate the processing of the HTTP POST to the adapter.
             // The adapter will invoke the bot.
-            await Adapter.ProcessActivityAsync(Request, Response, Callback);
+            await Adapter.ProcessActivityAsync(Request, Response, Bot.OnTurnAsync);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 //
 // Generated with Bot Builder V4 SDK Template for Visual Studio EchoBot v4.3.0
@@ -13,6 +13,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 using Microsoft.Bot.Sample.Slack.Bots;
+using Microsoft.BotKit.Adapters.Slack;
 
 namespace Microsoft.Bot.Sample.Slack
 {
@@ -31,10 +32,14 @@ namespace Microsoft.Bot.Sample.Slack
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             // Create the credential provider to be used with the Bot Framework Adapter.
-            services.AddSingleton<ICredentialProvider, ConfigurationCredentialProvider>();
+            //services.AddSingleton<ICredentialProvider, ConfigurationCredentialProvider>();
+
+            // Create the options for the SlackAdapter
+            services.AddSingleton<ISlackAdapterOptions, ConfigurationSlackAdapterOptions>();
+            //services.AddSingleton<IBotFrameworkHttpAdapter, BotFrameworkHttpAdapter>();
 
             // Create the Bot Framework Adapter.
-            services.AddSingleton<IBotFrameworkHttpAdapter, BotFrameworkHttpAdapter>();
+            services.AddSingleton<SlackAdapter>();
 
             // Create the bot as a transient. In this case the ASP Controller is expecting an IBot.
             services.AddTransient<IBot, EchoBot>();
