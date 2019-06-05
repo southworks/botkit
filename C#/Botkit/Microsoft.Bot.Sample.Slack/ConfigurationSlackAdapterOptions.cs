@@ -10,10 +10,10 @@ namespace Microsoft.Bot.Sample.Slack
     public class ConfigurationSlackAdapterOptions : SimpleSlackAdapterOptions
     {
         public ConfigurationSlackAdapterOptions(IConfiguration configuration)
-             : base(configuration["MicrosoftAppId"], configuration["MicrosoftAppPassword"])
+             : base("D3EikHqMQImUgTcEdSbXE5Vw", "")
         {
-            BotToken = "";
-            VerificationToken = "";
+            //BotToken = "";
+            //VerificationToken = "D3EikHqMQImUgTcEdSbXE5Vw";
         }
     }
 }
