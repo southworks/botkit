@@ -3,6 +3,7 @@
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.Bot.Builder;
+using Microsoft.Bot.Builder.Integration.AspNet.Core;
 using Microsoft.Bot.Schema;
 using Newtonsoft.Json;
 using System;
@@ -20,7 +21,7 @@ using System.IO;
 
 namespace Microsoft.BotKit.Adapters.Slack
 {
-    public class SlackAdapter : BotAdapter
+    public class SlackAdapter : BotAdapter, IBotFrameworkHttpAdapter
     {
         private readonly ISlackAdapterOptions options;
         private readonly SlackTaskClient Slack;
@@ -317,7 +318,7 @@ namespace Microsoft.BotKit.Adapters.Slack
         /// <param name="request">A request object from Restify or Express</param>
         /// <param name="response">A response object from Restify or Express</param>
         /// <param name="logic">A bot logic function in the form `async(context) => { ... }`</param>
-        public async Task ProcessActivityAsync(HttpRequest request, HttpResponse response, BotCallbackHandler logic)
+        public async Task ProcessAsync(HttpRequest request, HttpResponse response, IBot bot, CancellationToken cancellationToken = default(CancellationToken))
         {
             // Create an Activity based on the incoming message from Slack.
             // There are a few different types of event that Slack might send.
@@ -386,7 +387,7 @@ namespace Microsoft.BotKit.Adapters.Slack
                         var context = new TurnContext(this, activity);
                         context.TurnState.Add("httpStatus", "200");
 
-                        await RunPipelineAsync(context, logic, default(CancellationToken));
+                        await RunPipelineAsync(context, bot.OnTurnAsync, default(CancellationToken));
 
                         // send http response back
                         response.StatusCode = Convert.ToInt32(context.TurnState.Get<string>("httpStatus"));
@@ -456,7 +457,7 @@ namespace Microsoft.BotKit.Adapters.Slack
 
                         context.TurnState.Add("httpStatus", "200");
 
-                        await RunPipelineAsync(context, logic, default(CancellationToken));
+                        await RunPipelineAsync(context, bot.OnTurnAsync, default(CancellationToken));
 
                         // send http response back
                         response.StatusCode = Convert.ToInt32(context.TurnState.Get<string>("httpStatus"));
@@ -514,7 +515,7 @@ namespace Microsoft.BotKit.Adapters.Slack
 
                         context.TurnState.Add("httpStatus", "200");
 
-                        await RunPipelineAsync(context, logic, default(CancellationToken));
+                        await RunPipelineAsync(context, bot.OnTurnAsync, default(CancellationToken));
 
                         // send http response back
                         response.StatusCode = Convert.ToInt32(context.TurnState.Get<string>("httpStatus"));

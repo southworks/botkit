@@ -35,7 +35,7 @@ namespace Microsoft.Bot.Sample.Slack.Controllers
         {
             // Delegate the processing of the HTTP POST to the adapter.
             // The adapter will invoke the bot.
-            await Adapter.ProcessActivityAsync(Request, Response, Bot.OnTurnAsync);
+            await Adapter.ProcessAsync(Request, Response, Bot);
         }
     }
 }
