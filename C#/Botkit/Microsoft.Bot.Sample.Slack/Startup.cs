@@ -32,7 +32,7 @@ namespace Microsoft.Bot.Sample.Slack
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             // Create the credential provider to be used with the Bot Framework Adapter.
-            //services.AddSingleton<ICredentialProvider, ConfigurationCredentialProvider>();
+            services.AddSingleton<ICredentialProvider, ConfigurationCredentialProvider>();
 
             // Create the options for the SlackAdapter
             services.AddSingleton<ISlackAdapterOptions, ConfigurationSlackAdapterOptions>();
