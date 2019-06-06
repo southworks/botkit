@@ -127,8 +127,6 @@ namespace Microsoft.BotKit.Adapters.Slack
         /// <returns></returns>
         public async Task<string> GetBotUserByTeamAsync(Activity activity)
         {
-            //return null; // REMOVE THIS LATER!
-
             if (!string.IsNullOrEmpty(Identity))
             {
                 return Identity;
@@ -279,9 +277,9 @@ namespace Microsoft.BotKit.Adapters.Slack
         {
             if (activity.Id != null && activity.Conversation != null)
             {
-                object message = ActivityToSlack(activity);
+                NewSlackMessage message = ActivityToSlack(activity) as NewSlackMessage;
                 SlackTaskClient slack = await GetAPIAsync(activity);
-                var results = await slack.UpdateAsync(activity.Timestamp.ToString(), activity.ChannelId, message.ToString());
+                var results = await slack.UpdateAsync(activity.Timestamp.ToString(), activity.ChannelId, message.text);
                 if (!results.ok)
                 {
                     throw new Exception($"Error updating activity on Slack:{results}");
@@ -357,21 +355,9 @@ namespace Microsoft.BotKit.Adapters.Slack
                     },
                 };
 
-                JsonSerializer BotMessageSerializer = JsonSerializer.Create(new JsonSerializerSettings
-                {
-                    NullValueHandling = NullValueHandling.Ignore,
-                    Formatting = Formatting.Indented,
-                    DateFormatHandling = DateFormatHandling.IsoDateFormat,
-                    DateTimeZoneHandling = DateTimeZoneHandling.Utc,
-                    ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
-                    ContractResolver = new ReadOnlyJsonContractResolver(),
-                    Converters = new List<JsonConverter> { new Iso8601TimeSpanConverter() },
-                });
-
                 if ((slackEvent as dynamic).type == "url_verification")
                 {
                     response.StatusCode = 200;
-                    byte[] byteArray = Encoding.ASCII.GetBytes(slackEvent.challenge.Value.ToString());
                     response.ContentType = "text/plain";
                     string text = slackEvent.challenge.ToString();
                     await response.WriteAsync(text);
@@ -426,10 +412,10 @@ namespace Microsoft.BotKit.Adapters.Slack
                             response.StatusCode = Convert.ToInt32(context.TurnState.Get<string>("httpStatus"));
                             if (context.TurnState.Get<object>("httpBody") != null)
                             {
-                                byte[] byteArray = Encoding.ASCII.GetBytes(new ObjectContent(context.TurnState.Get<string>("httpBody").GetType(),
-                                                                           context.TurnState.Get<string>("httpBody"),
-                                                                           formatters[0]).Value.ToString());
-                                response.Body = new MemoryStream(byteArray);
+                                response.StatusCode = 200;
+                                response.ContentType = "text/plain";
+                                string text = context.TurnState.Get<string>("httpBody");
+                                await response.WriteAsync(text);
                             }
                         }
                     }
@@ -438,9 +424,10 @@ namespace Microsoft.BotKit.Adapters.Slack
                         // this is an event api post
                         if (options.VerificationToken != null && (slackEvent as dynamic).token != options.VerificationToken)
                         {
-                            response.StatusCode = 403;
-                            byte[] byteArray = Encoding.ASCII.GetBytes(new ObjectContent(typeof(string), string.Empty, formatters[0]).Value.ToString());
-                            response.Body = new MemoryStream(byteArray);
+                            response.StatusCode = 200;
+                            response.ContentType = "text/plain";
+                            string text = string.Empty;
+                            await response.WriteAsync(text);
                         }
                         else
                         {
@@ -496,9 +483,10 @@ namespace Microsoft.BotKit.Adapters.Slack
                             response.StatusCode = Convert.ToInt32(context.TurnState.Get<string>("httpStatus"));
                             if (context.TurnState.Get<object>("httpBody") != null)
                             {
-                                var messageBody = context.TurnState.Get<object>("httpBody");
-                                byte[] byteArray = Encoding.ASCII.GetBytes(new ObjectContent(messageBody.GetType(), messageBody, formatters[0]).Value.ToString());
-                                response.Body = new MemoryStream(byteArray);
+                                response.StatusCode = 200;
+                                response.ContentType = "text/plain";
+                                string text = context.TurnState.Get<object>("httpBody").ToString();
+                                await response.WriteAsync(text);
                             }
                         }
                     }
@@ -554,14 +542,17 @@ namespace Microsoft.BotKit.Adapters.Slack
                             response.StatusCode = Convert.ToInt32(context.TurnState.Get<string>("httpStatus"));
                             if (context.TurnState.Get<object>("httpBody") != null)
                             {
-                                var messageBody = context.TurnState.Get<object>("httpBody");
-                                byte[] byteArray = Encoding.ASCII.GetBytes(new ObjectContent(messageBody.GetType(), messageBody, formatters[0]).Value.ToString());
-                                response.Body = new MemoryStream(byteArray);
+                                response.StatusCode = 200;
+                                response.ContentType = "text/plain";
+                                string text = context.TurnState.Get<object>("httpBody").ToString();
+                                await response.WriteAsync(text);
                             }
                             else
                             {
-                                byte[] byteArray = Encoding.ASCII.GetBytes(new ObjectContent(typeof(string), string.Empty, formatters[0]).Value.ToString());
-                                response.Body = new MemoryStream(byteArray);
+                                response.StatusCode = 200;
+                                response.ContentType = "text/plain";
+                                string text = string.Empty;
+                                await response.WriteAsync(text);
                             }
                         }
                     }
