@@ -251,7 +251,7 @@ namespace Microsoft.BotKit.Adapters.Slack
                         }
                         else
                         {
-                            throw new Exception("Error sending activity to API:${result}");
+                            throw new Exception($"Error sending activity to API:{result}");
                         }
                     }
                     catch (Exception ex)
@@ -424,13 +424,14 @@ namespace Microsoft.BotKit.Adapters.Slack
                         // this is an event api post
                         if (options.VerificationToken != null && (slackEvent as dynamic).token != options.VerificationToken)
                         {
-                            response.StatusCode = 200;
+                            response.StatusCode = 403;
                             response.ContentType = "text/plain";
-                            string text = string.Empty;
+                            string text = $"Rejected due to mismatched verificationToken:{slackEvent}";
                             await response.WriteAsync(text);
                         }
                         else
                         {
+
                             Activity activity = new Activity()
                             {
                                 Id = ((dynamic)slackEvent)["event"].ts,
@@ -438,7 +439,7 @@ namespace Microsoft.BotKit.Adapters.Slack
                                 ChannelId = "slack",
                                 Conversation = new ConversationAccount()
                                 {
-                                    Id = slackEvent.channel //id
+                                    Id = (slackEvent as dynamic)["event"].channel //id
                                 },
                                 From = new ChannelAccount()
                                 {
