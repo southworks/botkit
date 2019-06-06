@@ -172,7 +172,7 @@ namespace Microsoft.BotKit.Adapters.Slack
         /// <returns>A Slack message object with {text, attachments, channel, thread ts} as well as any fields found in activity.channelData</returns>
         public object ActivityToSlack(Activity activity)
         {
-            dynamic message = new ExpandoObject();
+            dynamic message = new NewSlackMessage();
             message.TS = activity.Id;
             message.Text = activity.Text;
             message.Attachments = activity.Attachments;
@@ -186,12 +186,12 @@ namespace Microsoft.BotKit.Adapters.Slack
             }
 
             // should this message be sent as an ephemeral message
-            if ((message as dynamic).ephemeral)
+            if (message.Ephemeral)
             {
                 message.User = activity.Recipient.Id;
             }
 
-            if ((message as dynamic).icon_url != null || (message as dynamic).icon_emoji != null || (message as dynamic).username != null)
+            if (message.IconUrl != null || message.IconEmoji != null || message.username != null)
             {
                 message.AsUser = false;
             }
