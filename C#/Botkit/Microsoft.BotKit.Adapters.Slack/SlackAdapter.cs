@@ -104,12 +104,12 @@ namespace Microsoft.BotKit.Adapters.Slack
                 return Slack;
             }
 
-            if ((activity.Conversation as dynamic).team == null)
+            if (activity.Conversation.Properties["team"] == null)
             {
                 throw new Exception($"Unable to create API based on activity:{activity}");
             }
 
-            var token = await options.GetTokenForTeam((activity.Conversation as dynamic).team);
+            var token = await options.GetTokenForTeam(activity.Conversation.Properties["team"].ToString());
             return string.IsNullOrEmpty(token) ? new SlackTaskClient(token) : throw new Exception("Missing credentials for team.");
         }
 
@@ -127,12 +127,12 @@ namespace Microsoft.BotKit.Adapters.Slack
                 return Identity;
             }
 
-            if ((activity.Conversation as dynamic).team == null)
+            if (activity.Conversation.Properties["team"] == null)
             {
                 return null;
             }
 
-            var userID = await options.GetBotUserByTeam((activity.Conversation as dynamic).team);
+            var userID = await options.GetBotUserByTeam(activity.Conversation.Properties["team"].ToString());
             return !string.IsNullOrEmpty(userID) ? userID : throw new Exception("Missing credentials for team.");
         }
 
@@ -171,7 +171,7 @@ namespace Microsoft.BotKit.Adapters.Slack
             message.Text = activity.Text;
             message.Attachments = activity.Attachments;
             message.Channel = activity.Conversation.Id;
-            message.ThreadTS = (activity.Conversation as dynamic).threadTS;
+            message.ThreadTS = activity.Conversation.Properties["threadTS"];
 
             // if channelData is specified, overwrite any fields in message object
             if (activity.ChannelData != null)
@@ -375,8 +375,8 @@ namespace Microsoft.BotKit.Adapters.Slack
                         };
 
                         // Extra fields that do not belong to activity
-                        (activity.Conversation as dynamic).ThreadTs = slackEvent.ThreadTs;
-                        (activity.Conversation as dynamic).Team = slackEvent.Team.Id;
+                        activity.Conversation.Properties["ThreadTS"] = slackEvent.ThreadTs;
+                        activity.Conversation.Properties["team"] = slackEvent.Team.Id;
 
                         // this complains because of extra fields in conversation
                         activity.Recipient.Id = await GetBotUserByTeamAsync(activity);
@@ -432,7 +432,7 @@ namespace Microsoft.BotKit.Adapters.Slack
                         };
 
                         // Extra field that doesn't belong to activity
-                        (activity.Conversation as dynamic).ThreadTs = slackEvent.ThreadTs;
+                        activity.Conversation.Properties["ThreadTS"] = slackEvent.ThreadTs;
 
                         // this complains because of extra fields in conversation
                         activity.Recipient.Id = await GetBotUserByTeamAsync(activity);
@@ -441,7 +441,7 @@ namespace Microsoft.BotKit.Adapters.Slack
                         (activity.ChannelData as dynamic).team = slackEvent.TeamId;
 
                         // add the team id to the conversation record
-                        (activity.Conversation as dynamic).team = (activity.ChannelData as dynamic).team;
+                        activity.Conversation.Properties["team"] = (activity.ChannelData as dynamic).team;
 
                         // If this is conclusively a message originating from a user, we'll mark it as such
                         if (slackEvent.Event.Type == "message" && slackEvent.Event.Subtype == null)
@@ -505,7 +505,7 @@ namespace Microsoft.BotKit.Adapters.Slack
                         (activity.ChannelData as dynamic).team = slackEvent.TeamId;
 
                         // add the team id to the conversation record
-                        (activity.Conversation as dynamic).team = (activity.ChannelData as dynamic).team;
+                        activity.Conversation.Properties["team"] = (activity.ChannelData as dynamic).team;
 
                         (activity.ChannelData as dynamic).BotkitEventType = "slash_command";
 
