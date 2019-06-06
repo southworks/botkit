@@ -29,22 +29,9 @@ namespace Microsoft.BotKit.Adapters.Slack
         /// </summary>
         /// <param name="botkit">The Botkit controller object responsible for spawning this bot worker</param>
         /// <param name="config">Normally, a DialogContext object.  Can also be the id of a team.</param>
-        public SlackBotWorker(Botkit botkit, object config) : base(botkit, config)
+        public SlackBotWorker(Botkit botkit, BotWorkerConfiguration config) : base(botkit, config)
         {
-            // allow a teamid to be passed in
-            if (config.GetType().ToString() == "string")
-            {
-                var teamId = config;
-                DialogContext context = null;
-
-                // an activity is required to spawn the bot via the api
-                (context.Context.Activity as dynamic).Team = teamId; //TO-DO: replace 'as dynamic'
-
-                // a reference is used to spawn an api instance inside the adapter...
-                (context.Context.Activity.RelatesTo.Conversation as dynamic).Team = teamId; //TO-DO: replace 'as dynamic'
-
-                config = context;
-            }
+            // TODO make overload to allow a teamid (string) to be passed in
         }
 
         /// <summary>
@@ -59,7 +46,7 @@ namespace Microsoft.BotKit.Adapters.Slack
             if (channel.ok)
             {
                 var convRef = new ConversationReference();
-                var activity = (Activity)this.GetConfig("activity");
+                var activity = config.Activity;
 
                 convRef.Conversation.Id = channel.channel.id;
                 (convRef.Conversation as dynamic).Team = (activity.Conversation as dynamic).Team; //TO-DO: replace 'as dynamic'
@@ -67,7 +54,7 @@ namespace Microsoft.BotKit.Adapters.Slack
                 convRef.User.Name = null;
                 convRef.ChannelId = "slack";
 
-                return ChangeContext(convRef);
+                return ChangeContextAsync(convRef);
             }
             else
             {
@@ -84,7 +71,7 @@ namespace Microsoft.BotKit.Adapters.Slack
         public async Task<object> StartConversationInChannel(string channelId, string userId)
         {
             var convRef = new ConversationReference();
-            var activity = (Activity) GetConfig("activity");
+            var activity = config.Activity;
 
             convRef.Conversation.Id = channelId;
             (convRef.Conversation as dynamic).Team = (activity.Conversation as dynamic).Team; //TO-DO: replace 'as dynamic'
@@ -92,7 +79,7 @@ namespace Microsoft.BotKit.Adapters.Slack
             convRef.User.Name = null;
             convRef.ChannelId = "slack";
 
-            return await ChangeContext(convRef);
+            return await ChangeContextAsync(convRef);
         }
 
         /// <summary>
@@ -105,7 +92,7 @@ namespace Microsoft.BotKit.Adapters.Slack
         public async Task<object> StartConversationInThread(string channelId, string userId, string threadTs)
         {
             var convRef = new ConversationReference();
-            var activity = (Activity)this.GetConfig("activity");
+            var activity = config.Activity;
 
             convRef.Conversation.Id = channelId;
             (convRef.Conversation as dynamic).Team = (activity.Conversation as dynamic).Team; //TO-DO: replace 'as dynamic'
@@ -114,7 +101,7 @@ namespace Microsoft.BotKit.Adapters.Slack
             convRef.User.Name = null;
             convRef.ChannelId = "slack";
 
-            return await ChangeContext(convRef);
+            return await ChangeContextAsync(convRef);
         }
 
         /// <summary>
@@ -122,7 +109,7 @@ namespace Microsoft.BotKit.Adapters.Slack
         /// </summary>
         /// <param name="source">An incoming message object</param>
         /// <param name="resp">An outgoing message object (or part of one or just reply text)</param>
-        public async Task<object> ReplyInThread(IBotkitMessage source, IBotkitMessage resp)
+        public async Task<object> ReplyInThread(BotkitSlackMessage source, BotkitSlackMessage resp)
         {
             // make sure the  threadTs setting is set
             // this will be included in the conversation reference
@@ -132,7 +119,7 @@ namespace Microsoft.BotKit.Adapters.Slack
                 threadTs = (source.IncomingMessage.ChannelData as dynamic).Ts; //TO-DO: replace 'as dynamic'
             }
 
-            return await Reply(source, resp);
+            return await ReplyAsync(source, resp);
         }
 
         /// <summary>
@@ -141,7 +128,7 @@ namespace Microsoft.BotKit.Adapters.Slack
         /// </summary>
         /// <param name="source">An incoming message object</param>
         /// <param name="resp">An outgoing message object (or part of one or just reply text)</param>
-        public async Task<object> ReplyEphemeral(IBotkitMessage source, IBotkitMessage resp)
+        public async Task<object> ReplyEphemeral(BotkitSlackMessage source, BotkitSlackMessage resp)
         {
             // make sure resp is in an object format.
             var activity = EnsureMessageFormat(resp);
@@ -152,7 +139,7 @@ namespace Microsoft.BotKit.Adapters.Slack
 
             resp.IncomingMessage = activity;
 
-            return await Reply(source, resp);
+            return await ReplyAsync(source, resp);
         }
 
         /// <summary>
@@ -161,7 +148,7 @@ namespace Microsoft.BotKit.Adapters.Slack
         /// </summary>
         /// <param name="source">An incoming message object of type `slash_command`</param>
         /// <param name="resp">An outgoing message object (or part of one or just reply text)</param>
-        public async Task<object> ReplyPublic(IBotkitMessage source, IBotkitMessage resp)
+        public async Task<object> ReplyPublic(BotkitSlackMessage source, BotkitSlackMessage resp)
         {
             var activity = EnsureMessageFormat(resp);
 
@@ -178,7 +165,7 @@ namespace Microsoft.BotKit.Adapters.Slack
         /// </summary>
         /// <param name="source">An incoming message object of type `slash_command`</param>
         /// <param name="resp">An outgoing message object (or part of one or just reply text)</param>
-        public async Task<object> ReplyPrivate(IBotkitMessage source, IBotkitMessage resp)
+        public async Task<object> ReplyPrivate(BotkitSlackMessage source, BotkitSlackMessage resp)
         {
             var activity = EnsureMessageFormat(resp);
 
@@ -196,7 +183,7 @@ namespace Microsoft.BotKit.Adapters.Slack
         /// </summary>
         /// <param name="source">An incoming message object of type `interactive_message`</param>
         /// <param name="resp">A new or modified message that will replace the original one</param>
-        public async Task<object> ReplyInteractive(IBotkitMessage source, IBotkitMessage resp)
+        public async Task<object> ReplyInteractive(BotkitSlackMessage source, BotkitSlackMessage resp)
         {
             if((source.IncomingMessage.ChannelData as dynamic).ResponseUrl is null) //TO-DO: replace 'as dynamic'
             {
@@ -214,9 +201,9 @@ namespace Microsoft.BotKit.Adapters.Slack
                 (activity.Conversation as dynamic).ThreadTs = (source.IncomingMessage.ChannelData as dynamic).ThreadTs; //TO-DO: replace 'as dynamic'
             }
 
-            var adapter = (SlackAdapter)GetController().Adapter;
+            var adapter = (SlackAdapter)Controller.Adapter;
 
-            activity = (Activity) adapter.ActivityToSlack(activity);
+            activity = (Activity)adapter.ActivityToSlack(activity);
 
             var requestOptions = new
             {
@@ -280,8 +267,8 @@ namespace Microsoft.BotKit.Adapters.Slack
         /// <param name="update">An object in the form `{id: <id of message to update>, conversation: { id: <channel> }, text: <new text>, card: <array of card objects>}`</param>
         public async Task<ResourceResponse> UpdateMessage(IBotkitMessage update)
         {
-            SlackAdapter adapter = (SlackAdapter)GetController().Adapter;
-            TurnContext context = (TurnContext)GetConfig("context");
+            SlackAdapter adapter = (SlackAdapter)Controller.Adapter;
+            TurnContext context = config.TurnContext;
             CancellationTokenSource source = new CancellationTokenSource();
             CancellationToken token = source.Token;
             return await adapter.UpdateActivityAsync(context, update.IncomingMessage, token);
@@ -293,8 +280,8 @@ namespace Microsoft.BotKit.Adapters.Slack
         /// <param name="update">An object in the form of `{id: <id of message to delete>, conversation: { id: <channel of message> }}`</param>
         public async Task DeleteMessage(IBotkitMessage update)
         {
-            var adapter = (BotFrameworkAdapter)GetController().Adapter;
-            var context = (TurnContext)GetConfig("context");
+            var adapter = (BotFrameworkAdapter)Controller.Adapter;
+            var context = config.TurnContext;
             CancellationTokenSource source = new CancellationTokenSource();
             CancellationToken token = source.Token;
             await adapter.DeleteActivityAsync(context, update.Reference, token);

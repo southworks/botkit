@@ -235,7 +235,7 @@ namespace Microsoft.BotKit.Core
         /// </summary>
         /// <param name="config">Preferably receives a DialogContext, though can also receive a TurnContext. If excluded, must call bot.changeContext(reference) before calling any other method.</param>
         /// <returns></returns>
-        public async Task<BotWorker> Spawn(object config)
+        public async Task<BotWorker> Spawn(BotWorkerConfiguration config)
         {
             return new BotWorker(new Botkit(new BotkitConfiguration()), config);
         }
