@@ -192,14 +192,15 @@ namespace Microsoft.BotKit
             activity = activity.ApplyConversationReference(conversationReference, true);
 
             // create a turn context
-            var turnContext = new TurnContext(Controller.Adapter, activity);
+            using (var turnContext = new TurnContext(Controller.Adapter, activity))
+            {
+                // create a new dialogContext so beginDialog works.
+                var dialogContext = await Controller.DialogSet.CreateContextAsync(turnContext);
 
-            // create a new dialogContext so beginDialog works.
-            var dialogContext = await Controller.DialogSet.CreateContextAsync(turnContext);
-
-            config.TurnContext = turnContext;
-            config.DialogContext = dialogContext;
-            config.Activity = activity;
+                config.TurnContext = turnContext;
+                config.DialogContext = dialogContext;
+                config.Activity = activity;
+            }
 
             return this;
         }

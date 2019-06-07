@@ -322,10 +322,11 @@ namespace Microsoft.BotKit.Adapters.Slack
         public async Task ContinueConversationAsync(ConversationReference reference, BotCallbackHandler logic)
         {
             var request = reference.GetContinuationActivity().ApplyConversationReference(reference, true); // TODO: check on this
-            
-            TurnContext context = new TurnContext(this, request);
 
-            await RunPipelineAsync(context, logic, default(CancellationToken));
+            using (TurnContext context = new TurnContext(this, request))
+            {
+                await RunPipelineAsync(context, logic, default(CancellationToken));
+            }
         }
 
         /// <summary>
@@ -403,19 +404,21 @@ namespace Microsoft.BotKit.Adapters.Slack
                             activity.Recipient.Id = await GetBotUserByTeamAsync(activity);
 
                             // create a conversation reference
-                            var context = new TurnContext(this, activity);
-                            context.TurnState.Add("httpStatus", "200");
-
-                            await RunPipelineAsync(context, bot.OnTurnAsync, default(CancellationToken));
-
-                            // send http response back
-                            response.StatusCode = Convert.ToInt32(context.TurnState.Get<string>("httpStatus"));
-                            if (context.TurnState.Get<object>("httpBody") != null)
+                            using (var context = new TurnContext(this, activity))
                             {
-                                response.StatusCode = 200;
-                                response.ContentType = "text/plain";
-                                string text = context.TurnState.Get<string>("httpBody");
-                                await response.WriteAsync(text);
+                                context.TurnState.Add("httpStatus", "200");
+
+                                await RunPipelineAsync(context, bot.OnTurnAsync, default(CancellationToken));
+
+                                // send http response back
+                                response.StatusCode = Convert.ToInt32(context.TurnState.Get<string>("httpStatus"));
+                                if (context.TurnState.Get<object>("httpBody") != null)
+                                {
+                                    response.StatusCode = 200;
+                                    response.ContentType = "text/plain";
+                                    string text = context.TurnState.Get<string>("httpBody");
+                                    await response.WriteAsync(text);
+                                }
                             }
                         }
                     }
@@ -474,20 +477,21 @@ namespace Microsoft.BotKit.Adapters.Slack
                             }
 
                             // create a conversation reference
-                            TurnContext context = new TurnContext(this, activity);
-
-                            context.TurnState.Add("httpStatus", "200");
-
-                            await RunPipelineAsync(context, bot.OnTurnAsync, default(CancellationToken));
-
-                            // send http response back
-                            response.StatusCode = Convert.ToInt32(context.TurnState.Get<string>("httpStatus"));
-                            if (context.TurnState.Get<object>("httpBody") != null)
+                            using (TurnContext context = new TurnContext(this, activity))
                             {
-                                response.StatusCode = 200;
-                                response.ContentType = "text/plain";
-                                string text = context.TurnState.Get<object>("httpBody").ToString();
-                                await response.WriteAsync(text);
+                                context.TurnState.Add("httpStatus", "200");
+
+                                await RunPipelineAsync(context, bot.OnTurnAsync, default(CancellationToken));
+
+                                // send http response back
+                                response.StatusCode = Convert.ToInt32(context.TurnState.Get<string>("httpStatus"));
+                                if (context.TurnState.Get<object>("httpBody") != null)
+                                {
+                                    response.StatusCode = 200;
+                                    response.ContentType = "text/plain";
+                                    string text = context.TurnState.Get<object>("httpBody").ToString();
+                                    await response.WriteAsync(text);
+                                }
                             }
                         }
                     }
@@ -533,27 +537,28 @@ namespace Microsoft.BotKit.Adapters.Slack
                             (activity.ChannelData as dynamic).BotkitEventType = "slash_command";
 
                             // create a conversation reference
-                            TurnContext context = new TurnContext(this, activity);
-
-                            context.TurnState.Add("httpStatus", "200");
-
-                            await RunPipelineAsync(context, bot.OnTurnAsync, default(CancellationToken));
-
-                            // send http response back
-                            response.StatusCode = Convert.ToInt32(context.TurnState.Get<string>("httpStatus"));
-                            if (context.TurnState.Get<object>("httpBody") != null)
+                            using (TurnContext context = new TurnContext(this, activity))
                             {
-                                response.StatusCode = 200;
-                                response.ContentType = "text/plain";
-                                string text = context.TurnState.Get<object>("httpBody").ToString();
-                                await response.WriteAsync(text);
-                            }
-                            else
-                            {
-                                response.StatusCode = 200;
-                                response.ContentType = "text/plain";
-                                string text = string.Empty;
-                                await response.WriteAsync(text);
+                                context.TurnState.Add("httpStatus", "200");
+
+                                await RunPipelineAsync(context, bot.OnTurnAsync, default(CancellationToken));
+
+                                // send http response back
+                                response.StatusCode = Convert.ToInt32(context.TurnState.Get<string>("httpStatus"));
+                                if (context.TurnState.Get<object>("httpBody") != null)
+                                {
+                                    response.StatusCode = 200;
+                                    response.ContentType = "text/plain";
+                                    string text = context.TurnState.Get<object>("httpBody").ToString();
+                                    await response.WriteAsync(text);
+                                }
+                                else
+                                {
+                                    response.StatusCode = 200;
+                                    response.ContentType = "text/plain";
+                                    string text = string.Empty;
+                                    await response.WriteAsync(text);
+                                }
                             }
                         }
                     }
