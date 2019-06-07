@@ -62,13 +62,13 @@ namespace Microsoft.BotKit.Adapters.Slack
                 Slack = new SlackTaskClient(this.options.BotToken);
                 Identity = Slack.MySelf?.id;
             }
-            else if (
-                string.IsNullOrEmpty(options.ClientId) ||
-                string.IsNullOrEmpty(options.ClientSecret) ||
-                string.IsNullOrEmpty(options.RedirectUri) ||
-                options.Scopes.Length > 0)
+            else
             {
-                throw new Exception("Missing Slack API credentials! Provide clientId, clientSecret, scopes and redirectUri as part of the SlackAdapter options.");
+                if (string.IsNullOrEmpty(options.ClientId) || string.IsNullOrEmpty(options.ClientSecret) ||
+                 string.IsNullOrEmpty(options.RedirectUri) || options.Scopes.Length > 0)
+                {
+                    throw new Exception("Missing Slack API credentials! Provide clientId, clientSecret, scopes and redirectUri as part of the SlackAdapter options.");
+                }
             }
 
             Ware ware = new Ware();
