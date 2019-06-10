@@ -1,7 +1,10 @@
 // Copyright(c) Microsoft Corporation.All rights reserved.
 // Licensed under the MIT License.
 
+using Microsoft.Rest.Serialization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Bot.Builder;
+using Microsoft.Bot.Builder.Integration.AspNet.Core;
 using Microsoft.Bot.Schema;
 using Newtonsoft.Json;
 using System;
@@ -15,10 +18,12 @@ using System.Threading.Tasks;
 using System.Net;
 using System.Text;
 using SlackAPI;
+using SlackAPI.WebSocketMessages;
+using System.IO;
 
 namespace Microsoft.BotKit.Adapters.Slack
 {
-    public class SlackAdapter : BotAdapter
+    public class SlackAdapter : BotAdapter, IBotFrameworkHttpAdapter
     {
         private readonly ISlackAdapterOptions options;
         private readonly SlackTaskClient Slack;
@@ -57,13 +62,13 @@ namespace Microsoft.BotKit.Adapters.Slack
                 Slack = new SlackTaskClient(this.options.BotToken);
                 Identity = Slack.MySelf?.id;
             }
-            else if (
-                string.IsNullOrEmpty(options.ClientId) ||
-                string.IsNullOrEmpty(options.ClientSecret) ||
-                string.IsNullOrEmpty(options.RedirectUri) ||
-                options.Scopes.Length > 0)
+            else
             {
-                throw new Exception("Missing Slack API credentials! Provide clientId, clientSecret, scopes and redirectUri as part of the SlackAdapter options.");
+                if (string.IsNullOrEmpty(options.ClientId) || string.IsNullOrEmpty(options.ClientSecret) ||
+                 string.IsNullOrEmpty(options.RedirectUri) || options.Scopes.Length > 0)
+                {
+                    throw new Exception("Missing Slack API credentials! Provide clientId, clientSecret, scopes and redirectUri as part of the SlackAdapter options.");
+                }
             }
 
             Ware ware = new Ware();
@@ -104,12 +109,12 @@ namespace Microsoft.BotKit.Adapters.Slack
                 return Slack;
             }
 
-            if ((activity.Conversation as dynamic).team == null)
+            if (activity.Conversation.Properties["team"] == null)
             {
                 throw new Exception($"Unable to create API based on activity:{activity}");
             }
 
-            var token = await options.GetTokenForTeam((activity.Conversation as dynamic).team);
+            var token = await options.GetTokenForTeam(activity.Conversation.Properties["team"].ToString());
             return string.IsNullOrEmpty(token) ? new SlackTaskClient(token) : throw new Exception("Missing credentials for team.");
         }
 
@@ -127,12 +132,12 @@ namespace Microsoft.BotKit.Adapters.Slack
                 return Identity;
             }
 
-            if ((activity.Conversation as dynamic).team == null)
+            if (activity.Conversation.Properties["team"] == null)
             {
                 return null;
             }
 
-            var userID = await options.GetBotUserByTeam((activity.Conversation as dynamic).team);
+            var userID = await options.GetBotUserByTeam(activity.Conversation.Properties["team"].ToString());
             return !string.IsNullOrEmpty(userID) ? userID : throw new Exception("Missing credentials for team.");
         }
 
@@ -166,26 +171,40 @@ namespace Microsoft.BotKit.Adapters.Slack
         /// <returns>A Slack message object with {text, attachments, channel, thread ts} as well as any fields found in activity.channelData</returns>
         public object ActivityToSlack(Activity activity)
         {
-            dynamic message = new ExpandoObject();
-            message.TS = activity.Id;
-            message.Text = activity.Text;
-            message.Attachments = activity.Attachments;
-            message.Channel = activity.Conversation.Id;
-            message.ThreadTS = (activity.Conversation as dynamic).threadTS;
+            NewSlackMessage message = new NewSlackMessage();
+
+            if (activity.Timestamp != null)
+            {
+                message.ts = activity.Timestamp.Value.DateTime;
+            }
+            message.text = activity.Text;
+
+            foreach (Microsoft.Bot.Schema.Attachment att in activity.Attachments)
+            {
+                SlackAPI.Attachment newAttachment = new SlackAPI.Attachment()
+                {
+                    author_name = att.Name,
+                    thumb_url = att.ThumbnailUrl,
+                };
+                message.attachments.Add(newAttachment);
+            }
+                
+            message.channel = activity.Conversation.Id;
+            //message.thread_ts = JsonConvert.DeserializeObject<DateTime>(activity.Conversation.Properties["thread_ts"].ToString());
 
             // if channelData is specified, overwrite any fields in message object
             if (activity.ChannelData != null)
             {
-                message = activity.ChannelData;
+                //message = activity.ChannelData;
             }
 
             // should this message be sent as an ephemeral message
-            if (message.ephemeral)
+            if (message.Ephemeral != null)
             {
-                message.User = activity.Recipient.Id;
+                message.user = activity.Recipient.Id;
             }
 
-            if (message.IconURL != null || message.IconEmoji != null || message.Username != null)
+            if (message.IconUrl != null || message.icons?.status_emoji != null || message.username != null)
             {
                 message.AsUser = false;
             }
@@ -206,33 +225,33 @@ namespace Microsoft.BotKit.Adapters.Slack
                 Activity activity = activities[i];
                 if (activity.Type == ActivityTypes.Message)
                 {
-                    dynamic message = ActivityToSlack(activity);
+                    NewSlackMessage message = ActivityToSlack(activity) as NewSlackMessage;
 
                     try
                     {
                         SlackTaskClient slack = await this.GetAPIAsync(turnContext.Activity);
-                        ChatPostMessageResult result = new ChatPostMessageResult();
+                        Response result;
 
-                        if (message.ephemeral)
+                        if (message.Ephemeral != null)
                         {
-                            result = await slack.PostEphemeralMessageAsync(message.Channel, message.Text, message.User);
+                            result = await slack.PostEphemeralMessageAsync(message.channel, message.text, message.user) as ChatPostEphemeralMessageResult;
                         }
                         else
                         {
-                            result = await slack.PostMessageAsync(message.Channel, message.Text);
+                            result = await slack.PostMessageAsync(message.channel, message.text) as ChatPostMessageResult;
                         }
 
                         if (result.ok)
                         {
                             ResourceResponse response = new ResourceResponse() //{ id = result.Id, activityId = result.Ts, conversation = new { Id = result.Channel } };
                             {
-                                Id = result.Id
+                                Id = (result as dynamic).Id
                             };
                             responses.Add(response as ResourceResponse);
                         }
                         else
                         {
-                            throw new Exception("Error sending activity to API:${result}");
+                            throw new Exception($"Error sending activity to API:{result}");
                         }
                     }
                     catch (Exception ex)
@@ -258,9 +277,9 @@ namespace Microsoft.BotKit.Adapters.Slack
         {
             if (activity.Id != null && activity.Conversation != null)
             {
-                object message = ActivityToSlack(activity);
+                NewSlackMessage message = ActivityToSlack(activity) as NewSlackMessage;
                 SlackTaskClient slack = await GetAPIAsync(activity);
-                var results = await slack.UpdateAsync(activity.Timestamp.ToString(), activity.ChannelId, message.ToString());
+                var results = await slack.UpdateAsync(activity.Timestamp.ToString(), activity.ChannelId, message.text);
                 if (!results.ok)
                 {
                     throw new Exception($"Error updating activity on Slack:{results}");
@@ -303,10 +322,11 @@ namespace Microsoft.BotKit.Adapters.Slack
         public async Task ContinueConversationAsync(ConversationReference reference, BotCallbackHandler logic)
         {
             var request = reference.GetContinuationActivity().ApplyConversationReference(reference, true); // TODO: check on this
-            
-            TurnContext context = new TurnContext(this, request);
 
-            await RunPipelineAsync(context, logic, default(CancellationToken));
+            using (TurnContext context = new TurnContext(this, request))
+            {
+                await RunPipelineAsync(context, logic, default(CancellationToken));
+            }
         }
 
         /// <summary>
@@ -315,221 +335,238 @@ namespace Microsoft.BotKit.Adapters.Slack
         /// <param name="request">A request object from Restify or Express</param>
         /// <param name="response">A response object from Restify or Express</param>
         /// <param name="logic">A bot logic function in the form `async(context) => { ... }`</param>
-        public async void ProcessActivityAsync(HttpRequestMessage request, HttpResponseMessage response, BotCallbackHandler logic)
+        public async Task ProcessAsync(HttpRequest request, HttpResponse response, IBot bot, CancellationToken cancellationToken = default(CancellationToken))
         {
-            // Create an Activity based on the incoming message from Slack.
-            // There are a few different types of event that Slack might send.
-            dynamic slackEvent = request.Content;
-
-            MediaTypeFormatter[] formatters = new MediaTypeFormatter[]
+            try
             {
-                new JsonMediaTypeFormatter
+                // Create an Activity based on the incoming message from Slack.
+                // There are a few different types of event that Slack might send.
+                StreamReader sr = new StreamReader(request.Body);
+                dynamic slackEvent = JsonConvert.DeserializeObject(sr.ReadToEnd());
+
+                MediaTypeFormatter[] formatters = new MediaTypeFormatter[]
                 {
-                    SupportedMediaTypes =
+                    new JsonMediaTypeFormatter
                     {
-                        new System.Net.Http.Headers.MediaTypeHeaderValue("application/json") { CharSet = "utf-8" },
-                        new System.Net.Http.Headers.MediaTypeHeaderValue("text/json") { CharSet = "utf-8" },
+                        SupportedMediaTypes =
+                        {
+                            new System.Net.Http.Headers.MediaTypeHeaderValue("application/json") { CharSet = "utf-8" },
+                            new System.Net.Http.Headers.MediaTypeHeaderValue("text/json") { CharSet = "utf-8" },
+                        },
                     },
-                },
-            };
+                };
 
-            if (slackEvent.type == "url_verification")
-            {
-                response.StatusCode = HttpStatusCode.OK;
-                response.RequestMessage = request;
-                response.Content = new ObjectContent((slackEvent.challenge as object).GetType(), slackEvent.challenge, formatters[0]);
-                return;
-            }
-
-            if (VerifySignature(request, response))
-            {
-                if (slackEvent.payload != null)
+                if ((slackEvent as dynamic).type == "url_verification")
                 {
-                    // handle interactive_message callbacks and block_actions
-                    slackEvent = JsonConvert.ToString(slackEvent.payload);
-                    if (options.VerificationToken != null && slackEvent.token != options.VerificationToken)
-                    {
-                        response.RequestMessage = request;
-                        response.StatusCode = HttpStatusCode.Forbidden;
-                    }
-                    else
-                    {
-                        Activity activity = new Activity()
-                        {
-                            Timestamp = new DateTime(),
-                            ChannelId = "slack",
-                            Conversation = new ConversationAccount()
-                            {
-                                Id = slackEvent.Channel.Id
-                            },
-                            From = new ChannelAccount()
-                            {
-                                Id = (slackEvent.BotId != null) ? slackEvent.BotId : slackEvent.User.Id
-                            },
-                            Recipient = new ChannelAccount()
-                            {
-                                Id = null
-                            },
-                            ChannelData = slackEvent,
-                            Type = ActivityTypes.Event
-                        };
-
-                        // Extra fields that do not belong to activity
-                        (activity.Conversation as dynamic).ThreadTs = slackEvent.ThreadTs;
-                        (activity.Conversation as dynamic).Team = slackEvent.Team.Id;
-
-                        // this complains because of extra fields in conversation
-                        activity.Recipient.Id = await GetBotUserByTeamAsync(activity);
-
-                        // create a conversation reference
-                        var context = new TurnContext(this, activity);
-                        context.TurnState.Add("httpStatus", "200");
-
-                        await RunPipelineAsync(context, logic, default(CancellationToken));
-
-                        // send http response back
-                        response.RequestMessage = request;
-                        response.StatusCode = (HttpStatusCode)Convert.ToInt32(context.TurnState.Get<string>("httpStatus"));
-                        if (context.TurnState.Get<object>("httpBody") != null)
-                        {
-                            response.Content = new ObjectContent(context.TurnState.Get<string>("httpBody").GetType(),
-                                                                 context.TurnState.Get<string>("httpBody"),
-                                                                 formatters[0]);
-                        }
-                    }
+                    response.StatusCode = 200;
+                    response.ContentType = "text/plain";
+                    string text = slackEvent.challenge.ToString();
+                    await response.WriteAsync(text);
                 }
-                else if (slackEvent.Type == "event_callback")
+
+                if (VerifySignature(request, response))
                 {
-                    // this is an event api post
-                    if (options.VerificationToken != null && slackEvent.Token != options.VerificationToken)
+                    if (slackEvent.payload != null)
                     {
-                        response.RequestMessage = request;
-                        response.StatusCode = HttpStatusCode.Forbidden;
-                        response.Content = new ObjectContent(typeof(string), string.Empty, formatters[0]);
-                    }
-                    else
-                    {
-                        Activity activity = new Activity()
+                        // handle interactive_message callbacks and block_actions
+                        slackEvent = JsonConvert.ToString(slackEvent.payload);
+                        if (options.VerificationToken != null && slackEvent.token != options.VerificationToken)
                         {
-                            Id = slackEvent.Event.Ts,
-                            Timestamp = new DateTime(),
-                            ChannelId = "slack",
-                            Conversation = new ConversationAccount()
-                            {
-                                Id = slackEvent.Channel.Id
-                            },
-                            From = new ChannelAccount()
-                            {
-                                Id = slackEvent.Event.BotId ? slackEvent.Event.BotId : slackEvent.Event.User
-                            },
-                            Recipient = new ChannelAccount()
-                            {
-                                Id = null
-                            },
-                            ChannelData = slackEvent.Event,
-                            Text = null,
-                            Type = ActivityTypes.Event
-                        };
-
-                        // Extra field that doesn't belong to activity
-                        (activity.Conversation as dynamic).ThreadTs = slackEvent.ThreadTs;
-
-                        // this complains because of extra fields in conversation
-                        activity.Recipient.Id = await GetBotUserByTeamAsync(activity);
-
-                        // Normalize the location of the team id
-                        (activity.ChannelData as dynamic).team = slackEvent.TeamId;
-
-                        // add the team id to the conversation record
-                        (activity.Conversation as dynamic).team = (activity.ChannelData as dynamic).team;
-
-                        // If this is conclusively a message originating from a user, we'll mark it as such
-                        if (slackEvent.Event.Type == "message" && slackEvent.Event.Subtype == null)
-                        {
-                            activity.Type = ActivityTypes.Message;
-                            activity.Text = slackEvent.Event.Text;
-                        }
-
-                        // create a conversation reference
-                        TurnContext context = new TurnContext(this, activity);
-
-                        context.TurnState.Add("httpStatus", "200");
-
-                        await RunPipelineAsync(context, logic, default(CancellationToken));
-
-                        // send http response back
-                        response.RequestMessage = request;
-                        response.StatusCode = (HttpStatusCode)Convert.ToInt32(context.TurnState.Get<string>("httpStatus"));
-                        if (context.TurnState.Get<object>("httpBody") != null)
-                        {
-                            var messageBody = context.TurnState.Get<object>("httpBody");
-                            response.Content = new ObjectContent(messageBody.GetType(), messageBody, formatters[0]);
-                        }
-                    }
-                }
-                else if (slackEvent.Command != null)
-                {
-                    if (options.VerificationToken != null && slackEvent.Token != options.VerificationToken)
-                    {
-                        response.RequestMessage = request;
-                        response.StatusCode = HttpStatusCode.Forbidden;
-                    }
-                    else
-                    {
-                        // this is a slash command
-                        Activity activity = new Activity()
-                        {
-                            Id = slackEvent.TriggerId,
-                            Timestamp = new DateTime(),
-                            ChannelId = "slack",
-                            Conversation = new ConversationAccount()
-                            {
-                                Id = slackEvent.ChannelId
-                            },
-                            From = new ChannelAccount()
-                            {
-                                Id = slackEvent.UserId
-                            },
-                            Recipient = new ChannelAccount()
-                            {
-                                Id = null
-                            },
-                            ChannelData = slackEvent,
-                            Text = slackEvent.text,
-                            Type = ActivityTypes.Event
-                        };
-
-                        activity.Recipient.Id = await GetBotUserByTeamAsync(activity);
-
-                        // Normalize the location of the team id
-                        (activity.ChannelData as dynamic).team = slackEvent.TeamId;
-
-                        // add the team id to the conversation record
-                        (activity.Conversation as dynamic).team = (activity.ChannelData as dynamic).team;
-
-                        (activity.ChannelData as dynamic).BotkitEventType = "slash_command";
-
-                        // create a conversation reference
-                        TurnContext context = new TurnContext(this, activity);
-
-                        context.TurnState.Add("httpStatus", "200");
-
-                        await RunPipelineAsync(context, logic, default(CancellationToken));
-
-                        // send http response back
-                        response.RequestMessage = request;
-                        response.StatusCode = (HttpStatusCode)Convert.ToInt32(context.TurnState.Get<string>("httpStatus"));
-                        if (context.TurnState.Get<object>("httpBody") != null)
-                        {
-                            var messageBody = context.TurnState.Get<object>("httpBody");
-                            response.Content = new ObjectContent(messageBody.GetType(), messageBody, formatters[0]);
+                            response.StatusCode = 403;
                         }
                         else
                         {
-                            response.Content = new ObjectContent(typeof(string), string.Empty, formatters[0]);
+                            Activity activity = new Activity()
+                            {
+                                Timestamp = new DateTime(),
+                                ChannelId = "slack",
+                                Conversation = new ConversationAccount()
+                                {
+                                    Id = slackEvent.Channel.Id
+                                },
+                                From = new ChannelAccount()
+                                {
+                                    Id = (slackEvent.BotId != null) ? slackEvent.BotId : slackEvent.User.Id
+                                },
+                                Recipient = new ChannelAccount()
+                                {
+                                    Id = null
+                                },
+                                ChannelData = slackEvent,
+                                Type = ActivityTypes.Event
+                            };
+
+                            // Extra fields that do not belong to activity
+                            activity.Conversation.Properties["thread_ts"] = slackEvent.ThreadTs;
+                            activity.Conversation.Properties["team"] = slackEvent.Team.Id;
+
+                            // this complains because of extra fields in conversation
+                            activity.Recipient.Id = await GetBotUserByTeamAsync(activity);
+
+                            // create a conversation reference
+                            using (var context = new TurnContext(this, activity))
+                            {
+                                context.TurnState.Add("httpStatus", "200");
+
+                                await RunPipelineAsync(context, bot.OnTurnAsync, default(CancellationToken));
+
+                                // send http response back
+                                response.StatusCode = Convert.ToInt32(context.TurnState.Get<string>("httpStatus"));
+                                if (context.TurnState.Get<object>("httpBody") != null)
+                                {
+                                    response.StatusCode = 200;
+                                    response.ContentType = "text/plain";
+                                    string text = context.TurnState.Get<string>("httpBody");
+                                    await response.WriteAsync(text);
+                                }
+                            }
+                        }
+                    }
+                    else if ((slackEvent as dynamic).type == "event_callback")
+                    {
+                        // this is an event api post
+                        if (options.VerificationToken != null && (slackEvent as dynamic).token != options.VerificationToken)
+                        {
+                            response.StatusCode = 403;
+                            response.ContentType = "text/plain";
+                            string text = $"Rejected due to mismatched verificationToken:{slackEvent}";
+                            await response.WriteAsync(text);
+                        }
+                        else
+                        {
+
+                            Activity activity = new Activity()
+                            {
+                                Id = ((dynamic)slackEvent)["event"].ts,
+                                Timestamp = new DateTime(),
+                                ChannelId = "slack",
+                                Conversation = new ConversationAccount()
+                                {
+                                    Id = (slackEvent as dynamic)["event"].channel //id
+                                },
+                                From = new ChannelAccount()
+                                {
+                                    Id = (((dynamic)slackEvent)["event"].bot_id != null)? ((dynamic)slackEvent)["event"].bot_id : ((dynamic)slackEvent)["event"].user
+                                },
+                                Recipient = new ChannelAccount()
+                                {
+                                    Id = null
+                                },
+                                ChannelData = ((dynamic)slackEvent)["event"],
+                                Text = null,
+                                Type = ActivityTypes.Event
+                            };
+
+                            // Extra field that doesn't belong to activity
+                            activity.Conversation.Properties["thread_ts"] = slackEvent.thread_ts;
+
+                            // this complains because of extra fields in conversation
+                            activity.Recipient.Id = await GetBotUserByTeamAsync(activity);
+
+                            // Normalize the location of the team id
+                            (activity.ChannelData as dynamic).team = slackEvent.team_id;
+
+                            // add the team id to the conversation record
+                            activity.Conversation.Properties["team"] = (activity.ChannelData as dynamic).team;
+
+                            // If this is conclusively a message originating from a user, we'll mark it as such
+                            if (((dynamic)slackEvent)["event"].type == "message" && ((dynamic)slackEvent)["event"].subtype == null)
+                            {
+                                activity.Type = ActivityTypes.Message;
+                                activity.Text = ((dynamic)slackEvent)["event"].text;
+                            }
+
+                            // create a conversation reference
+                            using (TurnContext context = new TurnContext(this, activity))
+                            {
+                                context.TurnState.Add("httpStatus", "200");
+
+                                await RunPipelineAsync(context, bot.OnTurnAsync, default(CancellationToken));
+
+                                // send http response back
+                                response.StatusCode = Convert.ToInt32(context.TurnState.Get<string>("httpStatus"));
+                                if (context.TurnState.Get<object>("httpBody") != null)
+                                {
+                                    response.StatusCode = 200;
+                                    response.ContentType = "text/plain";
+                                    string text = context.TurnState.Get<object>("httpBody").ToString();
+                                    await response.WriteAsync(text);
+                                }
+                            }
+                        }
+                    }
+                    else if (slackEvent.Command != null)
+                    {
+                        if (options.VerificationToken != null && slackEvent.Token != options.VerificationToken)
+                        {
+                            response.StatusCode = 403;
+                        }
+                        else
+                        {
+                            // this is a slash command
+                            Activity activity = new Activity()
+                            {
+                                Id = slackEvent.TriggerId,
+                                Timestamp = new DateTime(),
+                                ChannelId = "slack",
+                                Conversation = new ConversationAccount()
+                                {
+                                    Id = slackEvent.ChannelId
+                                },
+                                From = new ChannelAccount()
+                                {
+                                    Id = slackEvent.UserId
+                                },
+                                Recipient = new ChannelAccount()
+                                {
+                                    Id = null
+                                },
+                                ChannelData = slackEvent,
+                                Text = slackEvent.text,
+                                Type = ActivityTypes.Event
+                            };
+
+                            activity.Recipient.Id = await GetBotUserByTeamAsync(activity);
+
+                            // Normalize the location of the team id
+                            (activity.ChannelData as dynamic).team = slackEvent.TeamId;
+
+                            // add the team id to the conversation record
+                            activity.Conversation.Properties["team"] = (activity.ChannelData as dynamic).team;
+
+                            (activity.ChannelData as dynamic).BotkitEventType = "slash_command";
+
+                            // create a conversation reference
+                            using (TurnContext context = new TurnContext(this, activity))
+                            {
+                                context.TurnState.Add("httpStatus", "200");
+
+                                await RunPipelineAsync(context, bot.OnTurnAsync, default(CancellationToken));
+
+                                // send http response back
+                                response.StatusCode = Convert.ToInt32(context.TurnState.Get<string>("httpStatus"));
+                                if (context.TurnState.Get<object>("httpBody") != null)
+                                {
+                                    response.StatusCode = 200;
+                                    response.ContentType = "text/plain";
+                                    string text = context.TurnState.Get<object>("httpBody").ToString();
+                                    await response.WriteAsync(text);
+                                }
+                                else
+                                {
+                                    response.StatusCode = 200;
+                                    response.ContentType = "text/plain";
+                                    string text = string.Empty;
+                                    await response.WriteAsync(text);
+                                }
+                            }
                         }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Something went wrong: {ex.Message}");
             }
         }
 
@@ -537,12 +574,12 @@ namespace Microsoft.BotKit.Adapters.Slack
         /// Verify the signature of an incoming webhook request as originating from Slack.
         /// </summary>
         /// <returns>If signature is valid, returns true. Otherwise, sends a 401 error status via http response and then returns false.</returns>
-        private bool VerifySignature(HttpRequestMessage request, HttpResponseMessage response)
+        private bool VerifySignature(HttpRequest request, HttpResponse response)
         {
-            if (options.ClientSigningSecret != null && request.Content != null)
+            if (options.ClientSigningSecret != null && request.Body != null)
             {
                 var timestamp = request.Headers;
-                var body = request.Content;
+                var body = request.Body;
 
                 object[] signature = { "v0", timestamp.ToString(), body.ToString() };
 
@@ -552,7 +589,7 @@ namespace Microsoft.BotKit.Adapters.Slack
 
                 var hash = "v0=" + myHMAC.ComputeHash(Encoding.UTF8.GetBytes(baseString));
 
-                var retrievedSignature = request.Headers.GetValues("X-Slack-Signature");
+                var retrievedSignature = request.Headers["X-Slack-Signature"];
 
                 // Compare the hash of the computed signature with the retrieved signature with a secure hmac compare function
                 bool signatureIsValid = String.Equals(hash, retrievedSignature);
@@ -560,7 +597,7 @@ namespace Microsoft.BotKit.Adapters.Slack
                 // replace direct compare with the hmac result
                 if (!signatureIsValid)
                 {
-                    response.StatusCode = HttpStatusCode.Unauthorized;
+                    response.StatusCode = 401;
                     return false;
                 }
             }

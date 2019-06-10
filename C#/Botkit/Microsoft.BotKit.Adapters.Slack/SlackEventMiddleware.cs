@@ -11,14 +11,14 @@ using System.Threading.Tasks;
 
 namespace Microsoft.BotKit.Adapters.Slack
 {
-    public class SlackEventMiddleware : MiddlewareSet
+    public class SlackEventMiddleware : IMiddleware
     {
         /// <summary>
         /// A middleware for Botkit developers using the BotBuilder SlackAdapter class.
         /// This middleware causes Botkit to emit message events by their `type` or `subtype` field rather than their default BotBuilder Activity type(limited to message or event).
         /// This keeps the new Botkit behavior consistent withprevious versions, and provides helpful filtering on the many event types that Slack sends.
         /// </summary>
-        public async void OnTurn(TurnContext context, NextDelegate next, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task OnTurnAsync(ITurnContext context, NextDelegate next, CancellationToken cancellationToken = default(CancellationToken))
         {
             if ((context.Activity.Type == ActivityTypes.Event))
             {
