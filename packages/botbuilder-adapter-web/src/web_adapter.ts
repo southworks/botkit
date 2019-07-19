@@ -305,4 +305,16 @@ export class WebAdapter extends BotAdapter {
             res.end();
         }
     }
+
+    /**
+     * Is given user currently connected? Use this to test the websocket connection 
+     * between the bot and a given user before sending messages,
+     * particularly in cases where a long period of time may have passed.
+     *
+     * Example: `bot.controller.adapter.isConnected(message.user)`
+     * @param user the id of a user, typically from `message.user`
+     */
+    public isConnected(user: string): boolean {
+        return typeof clients[user] !== 'undefined';
+    }
 }

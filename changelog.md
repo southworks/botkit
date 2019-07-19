@@ -4,6 +4,11 @@
 
 [Want to contribute? Read our guide!](https://github.com/howdyai/botkit/blob/master/CONTRIBUTING.md)
 
+# Sub-package release notes
+
+* [botbuilder-adapter-web v1.0.2](packages/botbuilder-adapter-web/CHANGELOG.md#102)
+* [botbuilder-adapter-slack v1.0.2](packages/botbuilder-adapter-slack/CHANGELOG.md#102)
+
 # 4.0.1
 
 This is the first major release of the new version of Botkit!
