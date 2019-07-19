@@ -1,0 +1,40 @@
+C:\Repositories\BotBuilder-dotnet\libraries\Microsoft.Bot.Sample.Slack\bin\Debug\netcoreapp2.1\appsettings.json
+C:\Repositories\BotBuilder-dotnet\libraries\Microsoft.Bot.Sample.Slack\bin\Debug\netcoreapp2.1\Microsoft.Bot.Sample.Slack.deps.json
+C:\Repositories\BotBuilder-dotnet\libraries\Microsoft.Bot.Sample.Slack\bin\Debug\netcoreapp2.1\Microsoft.Bot.Sample.Slack.runtimeconfig.json
+C:\Repositories\BotBuilder-dotnet\libraries\Microsoft.Bot.Sample.Slack\bin\Debug\netcoreapp2.1\Microsoft.Bot.Sample.Slack.runtimeconfig.dev.json
+C:\Repositories\BotBuilder-dotnet\libraries\Microsoft.Bot.Sample.Slack\bin\Debug\netcoreapp2.1\Microsoft.Bot.Sample.Slack.dll
+C:\Repositories\BotBuilder-dotnet\libraries\Microsoft.Bot.Sample.Slack\bin\Debug\netcoreapp2.1\Microsoft.Bot.Sample.Slack.pdb
+C:\Repositories\BotBuilder-dotnet\libraries\Microsoft.Bot.Sample.Slack\bin\Debug\netcoreapp2.1\Microsoft.BotKit.Adapters.Slack.dll
+C:\Repositories\BotBuilder-dotnet\libraries\Microsoft.Bot.Sample.Slack\bin\Debug\netcoreapp2.1\Microsoft.BotKit.dll
+C:\Repositories\BotBuilder-dotnet\libraries\Microsoft.Bot.Sample.Slack\bin\Debug\netcoreapp2.1\Microsoft.BotKit.Adapters.Slack.pdb
+C:\Repositories\BotBuilder-dotnet\libraries\Microsoft.Bot.Sample.Slack\bin\Debug\netcoreapp2.1\Microsoft.BotKit.pdb
+C:\Repositories\BotBuilder-dotnet\libraries\Microsoft.Bot.Sample.Slack\obj\Debug\netcoreapp2.1\Microsoft.Bot.Sample.Slack.csprojAssemblyReference.cache
+C:\Repositories\BotBuilder-dotnet\libraries\Microsoft.Bot.Sample.Slack\obj\Debug\netcoreapp2.1\Microsoft.Bot.Sample.Slack.csproj.CoreCompileInputs.cache
+C:\Repositories\BotBuilder-dotnet\libraries\Microsoft.Bot.Sample.Slack\obj\Debug\netcoreapp2.1\Microsoft.Bot.Sample.Slack.RazorAssemblyInfo.cache
+C:\Repositories\BotBuilder-dotnet\libraries\Microsoft.Bot.Sample.Slack\obj\Debug\netcoreapp2.1\Microsoft.Bot.Sample.Slack.RazorAssemblyInfo.cs
+C:\Repositories\BotBuilder-dotnet\libraries\Microsoft.Bot.Sample.Slack\obj\Debug\netcoreapp2.1\Microsoft.Bot.Sample.Slack.AssemblyInfoInputs.cache
+C:\Repositories\BotBuilder-dotnet\libraries\Microsoft.Bot.Sample.Slack\obj\Debug\netcoreapp2.1\Microsoft.Bot.Sample.Slack.AssemblyInfo.cs
+C:\Repositories\BotBuilder-dotnet\libraries\Microsoft.Bot.Sample.Slack\obj\Debug\netcoreapp2.1\Microsoft.Bot.Sample.Slack.RazorTargetAssemblyInfo.cache
+C:\Repositories\BotBuilder-dotnet\libraries\Microsoft.Bot.Sample.Slack\obj\Debug\netcoreapp2.1\Microsoft.Bot.Sample.Slack.csproj.CopyComplete
+C:\Repositories\BotBuilder-dotnet\libraries\Microsoft.Bot.Sample.Slack\obj\Debug\netcoreapp2.1\Microsoft.Bot.Sample.Slack.dll
+C:\Repositories\BotBuilder-dotnet\libraries\Microsoft.Bot.Sample.Slack\obj\Debug\netcoreapp2.1\Microsoft.Bot.Sample.Slack.pdb
+C:\Repositories\BotBuilder-dotnet\libraries\BotKit Samples\Microsoft.Bot.Sample.Slack\bin\Debug\netcoreapp2.1\appsettings.json
+C:\Repositories\BotBuilder-dotnet\libraries\BotKit Samples\Microsoft.Bot.Sample.Slack\bin\Debug\netcoreapp2.1\Microsoft.Bot.Sample.Slack.deps.json
+C:\Repositories\BotBuilder-dotnet\libraries\BotKit Samples\Microsoft.Bot.Sample.Slack\bin\Debug\netcoreapp2.1\Microsoft.Bot.Sample.Slack.runtimeconfig.json
+C:\Repositories\BotBuilder-dotnet\libraries\BotKit Samples\Microsoft.Bot.Sample.Slack\bin\Debug\netcoreapp2.1\Microsoft.Bot.Sample.Slack.runtimeconfig.dev.json
+C:\Repositories\BotBuilder-dotnet\libraries\BotKit Samples\Microsoft.Bot.Sample.Slack\bin\Debug\netcoreapp2.1\Microsoft.Bot.Sample.Slack.dll
+C:\Repositories\BotBuilder-dotnet\libraries\BotKit Samples\Microsoft.Bot.Sample.Slack\bin\Debug\netcoreapp2.1\Microsoft.Bot.Sample.Slack.pdb
+C:\Repositories\BotBuilder-dotnet\libraries\BotKit Samples\Microsoft.Bot.Sample.Slack\bin\Debug\netcoreapp2.1\Microsoft.BotKit.Adapters.Slack.dll
+C:\Repositories\BotBuilder-dotnet\libraries\BotKit Samples\Microsoft.Bot.Sample.Slack\bin\Debug\netcoreapp2.1\Microsoft.BotKit.dll
+C:\Repositories\BotBuilder-dotnet\libraries\BotKit Samples\Microsoft.Bot.Sample.Slack\bin\Debug\netcoreapp2.1\Microsoft.BotKit.Adapters.Slack.pdb
+C:\Repositories\BotBuilder-dotnet\libraries\BotKit Samples\Microsoft.Bot.Sample.Slack\bin\Debug\netcoreapp2.1\Microsoft.BotKit.pdb
+C:\Repositories\BotBuilder-dotnet\libraries\BotKit Samples\Microsoft.Bot.Sample.Slack\obj\Debug\netcoreapp2.1\Microsoft.Bot.Sample.Slack.csprojAssemblyReference.cache
+C:\Repositories\BotBuilder-dotnet\libraries\BotKit Samples\Microsoft.Bot.Sample.Slack\obj\Debug\netcoreapp2.1\Microsoft.Bot.Sample.Slack.csproj.CoreCompileInputs.cache
+C:\Repositories\BotBuilder-dotnet\libraries\BotKit Samples\Microsoft.Bot.Sample.Slack\obj\Debug\netcoreapp2.1\Microsoft.Bot.Sample.Slack.RazorAssemblyInfo.cache
+C:\Repositories\BotBuilder-dotnet\libraries\BotKit Samples\Microsoft.Bot.Sample.Slack\obj\Debug\netcoreapp2.1\Microsoft.Bot.Sample.Slack.RazorAssemblyInfo.cs
+C:\Repositories\BotBuilder-dotnet\libraries\BotKit Samples\Microsoft.Bot.Sample.Slack\obj\Debug\netcoreapp2.1\Microsoft.Bot.Sample.Slack.AssemblyInfoInputs.cache
+C:\Repositories\BotBuilder-dotnet\libraries\BotKit Samples\Microsoft.Bot.Sample.Slack\obj\Debug\netcoreapp2.1\Microsoft.Bot.Sample.Slack.AssemblyInfo.cs
+C:\Repositories\BotBuilder-dotnet\libraries\BotKit Samples\Microsoft.Bot.Sample.Slack\obj\Debug\netcoreapp2.1\Microsoft.Bot.Sample.Slack.RazorTargetAssemblyInfo.cache
+C:\Repositories\BotBuilder-dotnet\libraries\BotKit Samples\Microsoft.Bot.Sample.Slack\obj\Debug\netcoreapp2.1\Microsoft.Bot.Sample.Slack.csproj.CopyComplete
+C:\Repositories\BotBuilder-dotnet\libraries\BotKit Samples\Microsoft.Bot.Sample.Slack\obj\Debug\netcoreapp2.1\Microsoft.Bot.Sample.Slack.dll
+C:\Repositories\BotBuilder-dotnet\libraries\BotKit Samples\Microsoft.Bot.Sample.Slack\obj\Debug\netcoreapp2.1\Microsoft.Bot.Sample.Slack.pdb
