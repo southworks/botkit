@@ -1,0 +1,16 @@
+{
+  "name": "facebook-bot",
+  "version": "1.0.0",
+  "description": "a test for the facebook adapter",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Microsoft",
+  "license": "MIT",
+  "dependencies": {
+    "botbuilder": "^4.4.0",
+    "botbuilder-adapter-facebook": "^1.0.0",
+    "restify": "^8.3.0"
+  }
+}

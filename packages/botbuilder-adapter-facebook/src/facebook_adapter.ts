@@ -11,6 +11,7 @@ import * as Debug from 'debug';
 import { FacebookBotWorker } from './botworker';
 import { FacebookAPI } from './facebook_api';
 import * as crypto from 'crypto';
+import { URLSearchParams } from 'url';
 const debug = Debug('botkit:facebook');
 
 /**
@@ -309,39 +310,57 @@ export class FacebookAdapter extends BotAdapter {
      */
     public async processActivity(req, res, logic: (context: TurnContext) => Promise<void>): Promise<void> {
         debug('IN FROM FACEBOOK >', req.body);
-        if (await this.verifySignature(req, res) === true) {
-            let event = req.body;
-            if (event.entry) {
-                for (var e = 0; e < event.entry.length; e++) {
-                    let payload = null;
-                    let entry = event.entry[e];
+        var url = req.url;
+        var params = url.split('?');
+        // var urlParams = new URLSearchParams(window.location.search);
+        var urlParams =  new URLSearchParams(params[1]);
 
-                    // handle normal incoming stuff
-                    if (entry.changes) {
-                        payload = entry.changes;
-                    } else if (entry.messaging) {
-                        payload = entry.messaging;
-                    }
+        // if (req.query['hub.mode'] === 'subscribe') {
+        if (urlParams.get('hub.mode') === 'subscribe') {
+            var verify_token = urlParams.get('hub.verify_token');
+            if (verify_token === this.options.verify_token) {
+                var challenge = urlParams.get('hub.challenge');
+                res.status = 200;
+                res.sendRaw(challenge);      
+            } else {
+                res.status = 401;
+                throw new Error('Webhook not validated');      
+            }
+        } else {    
+            if (await this.verifySignature(req, res) === true) {
+                let event = req.body;
+                if (event.entry) {
+                    for (var e = 0; e < event.entry.length; e++) {
+                        let payload = null;
+                        let entry = event.entry[e];
 
-                    for (let m = 0; m < payload.length; m++) {
-                        await this.processSingleMessage(payload[m], logic);
-                    }
-
-                    // handle standby messages (this bot is not the active receiver)
-                    if (entry.standby) {
-                        payload = entry.standyby;
+                        // handle normal incoming stuff
+                        if (entry.changes) {
+                            payload = entry.changes;
+                        } else if (entry.messaging) {
+                            payload = entry.messaging;
+                        }
 
                         for (let m = 0; m < payload.length; m++) {
-                            let message = payload[m];
-                            // indiciate that this message was received in standby mode rather than normal mode.
-                            message.standby = true;
-                            await this.processSingleMessage(message, logic);
+                            await this.processSingleMessage(payload[m], logic);
+                        }
+
+                        // handle standby messages (this bot is not the active receiver)
+                        if (entry.standby) {
+                            payload = entry.standyby;
+
+                            for (let m = 0; m < payload.length; m++) {
+                                let message = payload[m];
+                                // indiciate that this message was received in standby mode rather than normal mode.
+                                message.standby = true;
+                                await this.processSingleMessage(message, logic);
+                            }
                         }
                     }
-                }
 
-                res.status(200);
-                res.end();
+                    res.status(200);
+                    res.end();
+                }
             }
         }
     }
